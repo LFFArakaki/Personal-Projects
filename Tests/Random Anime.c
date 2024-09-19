@@ -18,7 +18,9 @@ void printRandoms(int min, int max) {
     "Executioner and her Way of Life", "Summer Storm", "Black Clover", "Infinite Dendogram",
     "Soul Buster", "Gatchaman Crowds", "Nichijou", "Say 'I Love You'", "Cluster Edge", "Rampo Kitan",
     "Scorching Ping Pong Girls", "Occultic;Nine", "Chaos;Child", "Oooku", "Insomniacs After School",
-    "And Yet the Town Moves", "Nazotokine", "To the Abandoned Sacred Beasts", "Wind Breaker"
+    "And Yet the Town Moves", "Nazotokine", "To the Abandoned Sacred Beasts", "Wind Breaker",
+    "Chou Yuu Sekai", "Roujin Z", "Mushishi", "Samurai Champloo", "Yubisaki to Renren", "Yi Ren Zhi Xia",
+    "Ikebukuro West Gate Park", "Nobunaga the Fool", "Tamayomi", "RWBY", "Unnamed Memory", "Baki", "Senjuushi"
     };
     unsigned int seed = time(0);
     
@@ -27,7 +29,7 @@ void printRandoms(int min, int max) {
 }
 
 int main() {
-    int min = 0, max = 66;
+    int min = 0, max = 79;
     printRandoms(min, max);
     return 0;
 }
