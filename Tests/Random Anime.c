@@ -21,6 +21,8 @@ void printRandoms(int min, int max) {
     "And Yet the Town Moves", "Nazotokine", "To the Abandoned Sacred Beasts", "Wind Breaker",
     "Chou Yuu Sekai", "Roujin Z", "Mushishi", "Samurai Champloo", "Yubisaki to Renren", "Yi Ren Zhi Xia",
     "Ikebukuro West Gate Park", "Nobunaga the Fool", "Tamayomi", "RWBY", "Unnamed Memory", "Baki", "Senjuushi"
+    "Shounen Maid", "Endro!", "Occult Academy", "D-Gray Man", "Outlaw Star", "Cowboy Bebop", "Tongling Fei",
+    "Anohana", "Maoyuu", "SAO", "Harmony", "Classicaloid", "Lycoris Recoil", "Sankarea", "Hyouka",
     };
     unsigned int seed = time(0);
     
@@ -29,7 +31,7 @@ void printRandoms(int min, int max) {
 }
 
 int main() {
-    int min = 0, max = 79;
+    int min = 0, max = 94;
     printRandoms(min, max);
     return 0;
 }
