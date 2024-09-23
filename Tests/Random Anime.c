@@ -4,7 +4,7 @@
 
 void printRandoms(int min, int max) {
     
-    char anime[100][100] = 
+    char anime[200][100] = 
     {
     "Monogatari", "Violet Evergarden", "Your Lie in April", "Romantic Killer", "Elusive Samurai",
     "Frieren", "Made in Abyss", "Girls Band Cry", "Jellyfish Can't Swim at Night", "Call of the Night",
@@ -22,7 +22,9 @@ void printRandoms(int min, int max) {
     "Chou Yuu Sekai", "Roujin Z", "Mushishi", "Samurai Champloo", "Yubisaki to Renren", "Yi Ren Zhi Xia",
     "Ikebukuro West Gate Park", "Nobunaga the Fool", "Tamayomi", "RWBY", "Unnamed Memory", "Baki", "Senjuushi"
     "Shounen Maid", "Endro!", "Occult Academy", "D-Gray Man", "Outlaw Star", "Cowboy Bebop", "Tongling Fei",
-    "Anohana", "Maoyuu", "SAO", "Harmony", "Classicaloid", "Lycoris Recoil", "Sankarea", "Hyouka",
+    "Anohana", "Maoyuu", "SAO", "Harmony", "Classicaloid", "Lycoris Recoil", "Sankarea", "Hyouka", "Senyuu",
+    "Twin Star Exorcists", "Eccentric Family", "Maria+Holic", "xxxHolic", "Ao Haru Ride", "Nana",
+    "Shikanokonokonoko Koshitantan", "Slam Dunk", "Astro Note", "Ergo Proxy"
     };
     unsigned int seed = time(0);
     
@@ -31,7 +33,7 @@ void printRandoms(int min, int max) {
 }
 
 int main() {
-    int min = 0, max = 94;
+    int min = 0, max = 104;
     printRandoms(min, max);
     return 0;
 }
