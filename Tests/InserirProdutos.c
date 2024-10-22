@@ -106,15 +106,17 @@ void mudarProdutos(struct produtos* produto, int i)
 
 void exibirProdutos(struct produtos* produto, int numeroDeProdutos)
 {
-    printf("\n-----------------------------------------------------------------------------------------------------\n");
-    printf("|CODIGO|        NOME        |                     DESCRIÇÃO                    |  PREÇO  |QUANTIDADE|\n");
+    printf("\n------------------------------------------------------------------------------------------------------\n");
+    printf("|                                         TABELA DE PRODUTOS                                         |\n");
+    printf("------------------------------------------------------------------------------------------------------\n");
+    printf("|CODIGO|        NOME        |                     DESCRIÇÃO                     |  PREÇO  |QUANTIDADE|\n");
     for(int i=0;i<numeroDeProdutos;i++)
     {
         produto[i].nome[strcspn(produto[i].nome, "\n")] = '\0';
         produto[i].descricao[strcspn(produto[i].descricao, "\n")] = '\0';
-        printf("-----------------------------------------------------------------------------------------------------\n");   
-        printf("|%-6i|%-20s|%-50s|%9.2f|%10i|\n",produto[i].codigo, produto[i].nome, produto[i].descricao, produto[i].preco, produto[i].quantidade);
+        printf("------------------------------------------------------------------------------------------------------\n");   
+        printf("|%-6i|%-20s|%-51s|%9.2f|%10i|\n",produto[i].codigo, produto[i].nome, produto[i].descricao, produto[i].preco, produto[i].quantidade);
     }
-    printf("-----------------------------------------------------------------------------------------------------\n"); 
+    printf("------------------------------------------------------------------------------------------------------\n"); 
     return;
 }
