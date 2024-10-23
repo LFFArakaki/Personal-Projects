@@ -17,10 +17,15 @@ void inserirProdutos(struct produtos* produto, int numeroDeProdutos);
 void mudarProdutos(struct produtos* produto, int i);
 void ordenar(struct produtos* produto, int numeroDeProdutos);
 void exibirProdutos(struct produtos* produto, int numeroDeProdutos);
+void menuOpcoes(struct produtos* produto, int numeroDeProdutos);
+void faseCompra(struct produtos* produto, int numeroDeProdutos);
+int checarCodigoValido(struct produtos* produto, int numeroDeProdutos, int codCompra);
+int confirmarResposta();
 
 int main()
 {
-    int numeroDeProdutos;
+    int numeroDeProdutos, x;
+    x=0;
     
     printf("FASE - Inserção de produtos:\n\n");
     printf("Quantos produtos diferentes a loja oferece?\n");
@@ -31,7 +36,8 @@ int main()
     
     inserirProdutos(produto, numeroDeProdutos);
     ordenar(produto, numeroDeProdutos);
-    exibirProdutos(produto, numeroDeProdutos);
+    menuOpcoes(produto, numeroDeProdutos);
+    
 
     return 0;
 }
@@ -102,6 +108,8 @@ void mudarProdutos(struct produtos* produto, int i)
     produto[i].codigo = produto[i+1].codigo;
     produto[i+1].codigo = intTemporario;
     
+    return;
+    
 }
 
 void exibirProdutos(struct produtos* produto, int numeroDeProdutos)
@@ -119,4 +127,103 @@ void exibirProdutos(struct produtos* produto, int numeroDeProdutos)
     }
     printf("------------------------------------------------------------------------------------------------------\n"); 
     return;
+}
+
+void menuOpcoes(struct produtos* produto, int numeroDeProdutos)
+{
+    int resposta;
+    
+    printf("\nO que deseja fazer?\n");
+    printf("0 - Finalizar compra/1 - Comprar um produto/2 - Ver lista de produtos\n");
+    
+    scanf("%i",&resposta);
+    
+    if(resposta < 0 || resposta > 2)
+    {
+        printf("Resposta inválida!\n");
+        printf("Digite o número ao lado da ação que deseja tomar\n");
+        menuOpcoes(produto, numeroDeProdutos);
+    }
+    else
+    {
+        switch(resposta)
+        {
+            case 0:
+                printf("Obrigado por comprar conosco!\n");
+                printf("Encerrando o programa!");
+                exit (0);
+                break;
+            case 1:
+                faseCompra(produto, numeroDeProdutos);
+                menuOpcoes(produto, numeroDeProdutos);
+                break;
+            case 2:
+                exibirProdutos(produto, numeroDeProdutos);
+                menuOpcoes(produto, numeroDeProdutos);
+                break;
+        }
+    }
+}
+
+void faseCompra(struct produtos* produto, int numeroDeProdutos)
+{
+    int codCompra, quantidadeCompra;
+    
+    printf("FASE - Compra de produtos:\n\n");
+    printf("Digite o código do produto que deseja comprar: ");
+    scanf("%i",&codCompra);
+    printf("Deseja mesmo comprar o produto '%s'?\n",produto[checarCodigoValido(produto, numeroDeProdutos, codCompra)].nome);
+    if(confirmarResposta() == 0)
+    {
+        menuOpcoes(produto, numeroDeProdutos);
+    }
+    printf("Quantos(as) '%s' deseja comprar?\n",produto[checarCodigoValido(produto, numeroDeProdutos, codCompra)].nome);
+    printf("(Quantidade em estoque: %i)\n",produto[checarCodigoValido(produto, numeroDeProdutos, codCompra)].quantidade);
+    scanf("%i",&quantidadeCompra);
+    if(quantidadeCompra > produto[checarCodigoValido(produto, numeroDeProdutos, codCompra)].quantidade)
+    {
+        printf("Quantidade insuficiente em estoque\n");
+        menuOpcoes(produto, numeroDeProdutos);
+    }
+    printf("Deseja mesmo comprar %i unidade(s) do produto '%s'?\n",quantidadeCompra, produto[checarCodigoValido(produto, numeroDeProdutos, codCompra)].nome);
+    if(confirmarResposta() == 0)
+    {
+        menuOpcoes(produto, numeroDeProdutos);
+    }
+    else
+    {
+        produto[checarCodigoValido(produto, numeroDeProdutos, codCompra)].quantidade = 
+        produto[checarCodigoValido(produto, numeroDeProdutos, codCompra)].quantidade - quantidadeCompra;
+        printf("Compra realizada com sucesso!\n");
+        menuOpcoes(produto, numeroDeProdutos);
+    }
+}
+
+int checarCodigoValido(struct produtos* produto, int numeroDeProdutos, int codCompra)
+{
+    for(int i=0;i<numeroDeProdutos;i++)
+    {
+        if(produto[i].codigo == codCompra)
+        {
+            return i;
+        }
+    }
+    
+    printf("Produto inexistente\n");
+    menuOpcoes(produto, numeroDeProdutos);
+}
+
+int confirmarResposta()
+{
+    int resposta;
+    
+    printf("0 - Não/ 1 - Sim\n");
+    scanf("%i",&resposta);
+    if(resposta < 0 || resposta > 1)
+    {
+        printf("Resposta inválida!\n");
+        printf("Digite o número ao lado da opção que deseja\n");
+        confirmarResposta();
+    }
+    return resposta;
 }
