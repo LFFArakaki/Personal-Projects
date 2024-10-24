@@ -5,6 +5,7 @@
 #define CARACTERES 200
 
 int ch;
+float precoTotal;
 struct produtos {
         int codigo;
         char nome[CARACTERES];
@@ -114,18 +115,18 @@ void mudarProdutos(struct produtos* produto, int i)
 
 void exibirProdutos(struct produtos* produto, int numeroDeProdutos)
 {
-    printf("\n------------------------------------------------------------------------------------------------------\n");
-    printf("|                                         TABELA DE PRODUTOS                                         |\n");
-    printf("------------------------------------------------------------------------------------------------------\n");
-    printf("|CODIGO|        NOME        |                     DESCRIÇÃO                     |  PREÇO  |QUANTIDADE|\n");
+    printf("\n--------------------------------------------------------------------------------------------------------\n");
+    printf("|                                          TABELA DE PRODUTOS                                          |\n");
+    printf("--------------------------------------------------------------------------------------------------------\n");
+    printf("|CODIGO|        NOME        |                     DESCRIÇÃO                     |   PREÇO   |QUANTIDADE|\n");
     for(int i=0;i<numeroDeProdutos;i++)
     {
         produto[i].nome[strcspn(produto[i].nome, "\n")] = '\0';
         produto[i].descricao[strcspn(produto[i].descricao, "\n")] = '\0';
-        printf("------------------------------------------------------------------------------------------------------\n");   
-        printf("|%-6i|%-20s|%-51s|%9.2f|%10i|\n",produto[i].codigo, produto[i].nome, produto[i].descricao, produto[i].preco, produto[i].quantidade);
+        printf("--------------------------------------------------------------------------------------------------------\n");   
+        printf("|%-6i|%-20s|%-51s|%11.2f|%10i|\n",produto[i].codigo, produto[i].nome, produto[i].descricao, produto[i].preco, produto[i].quantidade);
     }
-    printf("------------------------------------------------------------------------------------------------------\n"); 
+    printf("--------------------------------------------------------------------------------------------------------\n"); 
     return;
 }
 
@@ -133,7 +134,8 @@ void menuOpcoes(struct produtos* produto, int numeroDeProdutos)
 {
     int resposta;
     
-    printf("\nO que deseja fazer?\n");
+    printf("FASE - Compra de produtos:\n\n");
+    printf("O que deseja fazer?\n");
     printf("0 - Finalizar compra/1 - Comprar um produto/2 - Ver lista de produtos\n");
     
     scanf("%i",&resposta);
@@ -149,8 +151,10 @@ void menuOpcoes(struct produtos* produto, int numeroDeProdutos)
         switch(resposta)
         {
             case 0:
+                printf("Total gasto com as compras: R$%.2f\n",precoTotal);
                 printf("Obrigado por comprar conosco!\n");
                 printf("Encerrando o programa!");
+                fflush(stdin);
                 exit (0);
                 break;
             case 1:
@@ -168,14 +172,14 @@ void menuOpcoes(struct produtos* produto, int numeroDeProdutos)
 void faseCompra(struct produtos* produto, int numeroDeProdutos)
 {
     int codCompra, quantidadeCompra;
+    float precoCompra;
     
-    printf("FASE - Compra de produtos:\n\n");
-    printf("Digite o código do produto que deseja comprar: ");
+    printf("\nDigite o código do produto que deseja comprar: ");
     scanf("%i",&codCompra);
     printf("Deseja mesmo comprar o produto '%s'?\n",produto[checarCodigoValido(produto, numeroDeProdutos, codCompra)].nome);
     if(confirmarResposta() == 0)
     {
-        menuOpcoes(produto, numeroDeProdutos);
+        return;
     }
     printf("Quantos(as) '%s' deseja comprar?\n",produto[checarCodigoValido(produto, numeroDeProdutos, codCompra)].nome);
     printf("(Quantidade em estoque: %i)\n",produto[checarCodigoValido(produto, numeroDeProdutos, codCompra)].quantidade);
@@ -183,19 +187,22 @@ void faseCompra(struct produtos* produto, int numeroDeProdutos)
     if(quantidadeCompra > produto[checarCodigoValido(produto, numeroDeProdutos, codCompra)].quantidade)
     {
         printf("Quantidade insuficiente em estoque\n");
-        menuOpcoes(produto, numeroDeProdutos);
+        return;
     }
+    precoCompra = produto[checarCodigoValido(produto, numeroDeProdutos, codCompra)].preco*quantidadeCompra;
     printf("Deseja mesmo comprar %i unidade(s) do produto '%s'?\n",quantidadeCompra, produto[checarCodigoValido(produto, numeroDeProdutos, codCompra)].nome);
+    printf("A compra irá custar R$%.2f\n",precoCompra);
     if(confirmarResposta() == 0)
     {
-        menuOpcoes(produto, numeroDeProdutos);
+        return;
     }
     else
     {
         produto[checarCodigoValido(produto, numeroDeProdutos, codCompra)].quantidade = 
         produto[checarCodigoValido(produto, numeroDeProdutos, codCompra)].quantidade - quantidadeCompra;
+        precoTotal = precoTotal + precoCompra;
         printf("Compra realizada com sucesso!\n");
-        menuOpcoes(produto, numeroDeProdutos);
+        return;
     }
 }
 
@@ -222,7 +229,7 @@ int confirmarResposta()
     if(resposta < 0 || resposta > 1)
     {
         printf("Resposta inválida!\n");
-        printf("Digite o número ao lado da opção que deseja\n");
+        printf("Digite o numero ao lado da opção que deseja\n");
         confirmarResposta();
     }
     return resposta;
