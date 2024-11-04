@@ -2,23 +2,24 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define CHARACTERS 100
+#define CARACTERES 100
 #define MAXPRODUTOS 500
 
 struct produto {
         int codigo;
-		char nome[CHARACTERS];
+		char nome[CARACTERES];
 		int quantidade;
 		double preco;
 	};
 	
 int menuOpcoes();
-void incluirProduto();
-void alterarProduto();
-void excluirProduto();
-void comprarProduto();
-void consultarProduto();
+void incluirProduto(struct produto *ponteiroProdutos);
+void alterarProduto(struct produto *ponteiroProdutos);
+void excluirProduto(struct produto *ponteiroProdutos);
+void comprarProduto(struct produto *ponteiroProdutos);
+void consultarProduto(struct produto *ponteiroProdutos);
 void listarProdutos(struct produto *ponteiroProdutos);
+void mudarProdutos(struct produto *ponteiroProdutos, int i);
 
 int main()
 {
@@ -37,22 +38,22 @@ int main()
             return 0;
             break;
             case 1:
-            listarProdutos(ponteiroProdutos);
+            incluirProduto(ponteiroProdutos);
             break;
             case 2:
-            fflush(stdin);
+            alterarProduto(ponteiroProdutos);
             break;
             case 3:
-            printf("D");
+            excluirProduto(ponteiroProdutos);
             break;
             case 4:
-            printf("E");
+            comprarProduto(ponteiroProdutos);
             break;
             case 5:
-            printf("F");
+            consultarProduto(ponteiroProdutos);
             break;
             case 6:
-            printf("G");
+            listarProdutos(ponteiroProdutos);
             break;
         }
     }
@@ -64,7 +65,7 @@ int menuOpcoes()
 {
     int resposta;
     
-    printf("O que deseja fazer?\n");
+    printf("\nO que deseja fazer?\n");
     printf("0 - Finalizar compra\n");
     printf("1 - Incluir um produto\n");
     printf("2 - Alterar um produto\n");
@@ -79,7 +80,7 @@ int menuOpcoes()
     {
         printf("Resposta inválida!\n");
         printf("Digite o numero ao lado da ação que deseja tomar\n");
-        menuOpcoes(ponteiroProdutos);
+        menuOpcoes();
     }
     else
     {
@@ -87,27 +88,27 @@ int menuOpcoes()
     }
 }
 
-void incluirProduto()
+void incluirProduto(struct produto *ponteiroProdutos)
 {
     
 }
 
-void alterarProduto()
+void alterarProduto(struct produto *ponteiroProdutos)
 {
     
 }
 
-void excluirProduto()
+void excluirProduto(struct produto *ponteiroProdutos)
 {
     
 }
 
-void comprarProduto()
+void comprarProduto(struct produto *ponteiroProdutos)
 {
     
 }
 
-void consultarProduto()
+void consultarProduto(struct produto *ponteiroProdutos)
 {
  
 }
@@ -126,4 +127,30 @@ void listarProdutos(struct produto *ponteiroProdutos)
     }
     printf("----------------------------------------------------\n"); 
     return;
+}
+
+void mudarProdutos(struct produto *ponteiroProdutos, int i)
+{
+    int intTemporario;
+    float fltTemporario;
+    char stringTemporaria[CARACTERES];
+    
+    strcpy(stringTemporaria, (ponteiroProdutos + i)->nome);
+    strcpy((ponteiroProdutos + i)->nome, (ponteiroProdutos + i+1)->nome);
+    strcpy((ponteiroProdutos + i+1)->nome, stringTemporaria);
+    
+    fltTemporario = (ponteiroProdutos + i)->preco;
+    (ponteiroProdutos + i)->preco = (ponteiroProdutos + i+1)->preco;
+    (ponteiroProdutos + i+1)->preco = fltTemporario;
+    
+    intTemporario = (ponteiroProdutos + i)->quantidade;
+    (ponteiroProdutos + i)->quantidade = (ponteiroProdutos + i+1)->quantidade;
+    (ponteiroProdutos + i+1)->quantidade = intTemporario;
+    
+    intTemporario = (ponteiroProdutos + i)->codigo;
+    (ponteiroProdutos + i)->codigo = (ponteiroProdutos + i+1)->codigo;
+    (ponteiroProdutos + i+1)->codigo = intTemporario;
+    
+    return;
+    
 }
