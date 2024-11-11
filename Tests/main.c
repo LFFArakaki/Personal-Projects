@@ -39,98 +39,95 @@ struct pieces {
 
 void printBoard(struct pieces board[LINES][COLUMNS]);
 void movePiece(struct pieces* piece, struct pieces* destination, struct pieces board[LINES][COLUMNS]);
-void checkCheck(struct pieces board[LINES][COLUMNS], int* turnIndex);
 void checkCheckStraight(struct pieces* piece);
 void checkCheckDiagonal(struct pieces* piece);
 void checkCheckKnight(struct pieces* piece);
 void checkCheckPawn(struct pieces* piece);
+void checkCheck(struct pieces board[LINES][COLUMNS], int* turnIndex);
 void turn(struct pieces board[LINES][COLUMNS], int* turnCounter);
-bool checkPossible(struct pieces* piece, struct pieces* destination);
-bool checkPossiblePawn(struct pieces* piece, struct pieces* destination);
-bool checkPossibleKnight(struct pieces* piece, struct pieces* destination);
 
 int main()
 {
     struct pieces board[LINES][COLUMNS] = {
         {
-            {"Rk1", ROOK, BLACK, 1, 1, false, true, false},
-            {"Kt1", KNIGHT, BLACK, 1, 2, false, true, false},
-            {"Bp1", BISHOP, BLACK, 1, 3, false, true, false},
-            {"Kg1", KING, BLACK, 1, 4, false, true, false},
-            {"Qn1", QUEEN, BLACK, 1, 5, false, true, false},
-            {"Bp2", BISHOP, BLACK, 1, 6, false, true, false},
-            {"Kt2", KNIGHT, BLACK, 1, 7, false, true, false},
-            {"Rk2", ROOK, BLACK, 1, 8, false, true, false},
+            {"Rk1", ROOK, BLACK, 1, 1, false, true},
+            {"Kt1", KNIGHT, BLACK, 1, 2, false, true},
+            {"Bp1", BISHOP, BLACK, 1, 3, false, true},
+            {"Kg1", KING, BLACK, 1, 4, false, true},
+            {"Qn1", QUEEN, BLACK, 1, 5, false, true},
+            {"Bp2", BISHOP, BLACK, 1, 6, false, true},
+            {"Kt2", KNIGHT, BLACK, 1, 7, false, true},
+            {"Rk2", ROOK, BLACK, 1, 8, false, true},
         },
         {
-            {"Pn1", PAWN, BLACK, 2, 1, false, true, false},
-            {"Pn2", PAWN, BLACK, 2, 2, false, true, false},
-            {"Pn3", PAWN, BLACK, 2, 3, false, true, false},
-            {"Pn4", PAWN, BLACK, 2, 4, false, true, false},
-            {"Pn5", PAWN, BLACK, 2, 5, false, true, false},
-            {"Pn6", PAWN, BLACK, 2, 6, false, true, false},
-            {"Pn7", PAWN, BLACK, 2, 7, false, true, false},
-            {"Pn8", PAWN, BLACK, 2, 8, false, true, false},
+            {"Pn1", PAWN, BLACK, 2, 1, false, true},
+            {"Pn2", PAWN, BLACK, 2, 2, false, true},
+            {"Pn3", PAWN, BLACK, 2, 3, false, true},
+            {"Pn4", PAWN, BLACK, 2, 4, false, true},
+            {"Pn5", PAWN, BLACK, 2, 5, false, true},
+            {"Pn6", PAWN, BLACK, 2, 6, false, true},
+            {"Pn7", PAWN, BLACK, 2, 7, false, true},
+            {"Pn8", PAWN, BLACK, 2, 8, false, true},
         },
         {
-            {"   ", EMPTY, EMPTY, 3, 1, false, false, false},
-            {"   ", EMPTY, EMPTY, 3, 2, false, false, false},
-            {"   ", EMPTY, EMPTY, 3, 3, false, false, false},
-            {"   ", EMPTY, EMPTY, 3, 4, false, false, false},
-            {"   ", EMPTY, EMPTY, 3, 5, false, false, false},
-            {"   ", EMPTY, EMPTY, 3, 6, false, false, false},
-            {"   ", EMPTY, EMPTY, 3, 7, false, false, false},
-            {"   ", EMPTY, EMPTY, 3, 8, false, false, false},
+            {"   ", EMPTY, EMPTY, 3, 1, false, false},
+            {"   ", EMPTY, EMPTY, 3, 2, false, false},
+            {"   ", EMPTY, EMPTY, 3, 3, false, false},
+            {"   ", EMPTY, EMPTY, 3, 4, false, false},
+            {"   ", EMPTY, EMPTY, 3, 5, false, false},
+            {"   ", EMPTY, EMPTY, 3, 6, false, false},
+            {"   ", EMPTY, EMPTY, 3, 7, false, false},
+            {"   ", EMPTY, EMPTY, 3, 8, false, false},
         },
         {
-            {"   ", EMPTY, EMPTY, 4, 1, false, false, false},
-            {"   ", EMPTY, EMPTY, 4, 2, false, false, false},
-            {"   ", EMPTY, EMPTY, 4, 3, false, false, false},
-            {"   ", EMPTY, EMPTY, 4, 4, false, false, false},
-            {"   ", EMPTY, EMPTY, 4, 5, false, false, false},
-            {"   ", EMPTY, EMPTY, 4, 6, false, false, false},
-            {"   ", EMPTY, EMPTY, 4, 7, false, false, false},
-            {"   ", EMPTY, EMPTY, 4, 8, false, false, false},
+            {"   ", EMPTY, EMPTY, 4, 1, false, false},
+            {"   ", EMPTY, EMPTY, 4, 2, false, false},
+            {"   ", EMPTY, EMPTY, 4, 3, false, false},
+            {"   ", EMPTY, EMPTY, 4, 4, false, false},
+            {"   ", EMPTY, EMPTY, 4, 5, false, false},
+            {"   ", EMPTY, EMPTY, 4, 6, false, false},
+            {"   ", EMPTY, EMPTY, 4, 7, false, false},
+            {"   ", EMPTY, EMPTY, 4, 8, false, false},
         },
         {
-            {"   ", EMPTY, EMPTY, 5, 1, false, false, false},
-            {"   ", EMPTY, EMPTY, 5, 2, false, false, false},
-            {"   ", EMPTY, EMPTY, 5, 3, false, false, false},
-            {"   ", EMPTY, EMPTY, 5, 4, false, false, false},
-            {"   ", EMPTY, EMPTY, 5, 5, false, false, false},
-            {"   ", EMPTY, EMPTY, 5, 6, false, false, false},
-            {"   ", EMPTY, EMPTY, 5, 7, false, false, false},
-            {"   ", EMPTY, EMPTY, 5, 8, false, false, false},
+            {"   ", EMPTY, EMPTY, 5, 1, false, false},
+            {"   ", EMPTY, EMPTY, 5, 2, false, false},
+            {"   ", EMPTY, EMPTY, 5, 3, false, false},
+            {"   ", EMPTY, EMPTY, 5, 4, false, false},
+            {"   ", EMPTY, EMPTY, 5, 5, false, false},
+            {"   ", EMPTY, EMPTY, 5, 6, false, false},
+            {"   ", EMPTY, EMPTY, 5, 7, false, false},
+            {"   ", EMPTY, EMPTY, 5, 8, false, false},
         },
         {
-            {"   ", EMPTY, EMPTY, 6, 1, false, false, false},
-            {"   ", EMPTY, EMPTY, 6, 2, false, false, false},
-            {"   ", EMPTY, EMPTY, 6, 3, false, false, false},
-            {"   ", EMPTY, EMPTY, 6, 4, false, false, false},
-            {"   ", EMPTY, EMPTY, 6, 5, false, false, false},
-            {"   ", EMPTY, EMPTY, 6, 6, false, false, false},
-            {"   ", EMPTY, EMPTY, 6, 7, false, false, false},
-            {"   ", EMPTY, EMPTY, 6, 8, false, false, false},
+            {"   ", EMPTY, EMPTY, 6, 1, false, false},
+            {"   ", EMPTY, EMPTY, 6, 2, false, false},
+            {"   ", EMPTY, EMPTY, 6, 3, false, false},
+            {"   ", EMPTY, EMPTY, 6, 4, false, false},
+            {"   ", EMPTY, EMPTY, 6, 5, false, false},
+            {"   ", EMPTY, EMPTY, 6, 6, false, false},
+            {"   ", EMPTY, EMPTY, 6, 7, false, false},
+            {"   ", EMPTY, EMPTY, 6, 8, false, false},
         },
         {
-            {"Pn1", PAWN, WHITE, 7, 1, false, true, false},
-            {"Pn2", PAWN, WHITE, 7, 2, false, true, false},
-            {"Pn3", PAWN, WHITE, 7, 3, false, true, false},
-            {"Pn4", PAWN, WHITE, 7, 4, false, true, false},
-            {"Pn5", PAWN, WHITE, 7, 5, false, true, false},
-            {"Pn6", PAWN, WHITE, 7, 6, false, true, false},
-            {"Pn7", PAWN, WHITE, 7, 7, false, true, false},
-            {"Pn8", PAWN, WHITE, 7, 8, false, true, false},
+            {"Pn1", PAWN, WHITE, 7, 1, false, true},
+            {"Pn2", PAWN, WHITE, 7, 2, false, true},
+            {"Pn3", PAWN, WHITE, 7, 3, false, true},
+            {"Pn4", PAWN, WHITE, 7, 4, false, true},
+            {"Pn5", PAWN, WHITE, 7, 5, false, true},
+            {"Pn6", PAWN, WHITE, 7, 6, false, true},
+            {"Pn7", PAWN, WHITE, 7, 7, false, true},
+            {"Pn8", PAWN, WHITE, 7, 8, false, true},
         },
         {
-            {"Rk1", ROOK, WHITE, 8, 1, false, true, false},
-            {"Kt1", KNIGHT, WHITE, 8, 2, false, true, false},
-            {"Bp1", BISHOP, WHITE, 8, 3, false, true, false},
-            {"Kg1", KING, WHITE, 8, 4, false, true, false},
-            {"Qn1", QUEEN, WHITE, 8, 5, false, true, false},
-            {"Bp2", BISHOP, WHITE, 8, 6, false, true, false},
-            {"Kt2", KNIGHT, WHITE, 8, 7, false, true, false},
-            {"Rk2", ROOK, WHITE, 8, 8, false, true, false},
+            {"Rk1", ROOK, WHITE, 8, 1, false, true},
+            {"Kt1", KNIGHT, WHITE, 8, 2, false, true},
+            {"Bp1", BISHOP, WHITE, 8, 3, false, true},
+            {"Kg1", KING, WHITE, 8, 4, false, true},
+            {"Qn1", QUEEN, WHITE, 8, 5, false, true},
+            {"Bp2", BISHOP, WHITE, 8, 6, false, true},
+            {"Kt2", KNIGHT, WHITE, 8, 7, false, true},
+            {"Rk2", ROOK, WHITE, 8, 8, false, true},
         }
     };
     
@@ -144,8 +141,6 @@ int main()
     while(loop == 0)
     {
         turn(board, turnCounterPointer);
-        printf("Leave?\n");
-        scanf("%i",&loop);
     }
     
     fflush(stdin);
@@ -232,10 +227,8 @@ void movePiece(struct pieces* piece, struct pieces* destination, struct pieces b
     destination->color = piece->color;
     piece->color = EMPTY;
     
-    piece->canMove = false;
     piece->hasMoved = false;
     piece->justMoved = false;
-    destination->canMove = true;
     destination->hasMoved = true;
     destination->justMoved = true;
     
@@ -688,223 +681,12 @@ void turn(struct pieces board[LINES][COLUMNS], int* turnCounter)
         printf("(Lines are: 1-8)");
         return;
     }
+    
     destinationPointer = &board[destinationLine][destinationColumn];
+    *turnCounter = *turnCounter+1;
     
-    if(!checkPossible(piecePointer, destinationPointer))
-    {
-        printf("Impossible move!\n");
-        return;
-    }
-    else
-    {
-        *turnCounter = *turnCounter+1;
-        
-        movePiece(piecePointer, destinationPointer, board);
-        checkCheck(board, turnIndexPointer);
-        return;
-    }
-}
-
-bool checkPossible(struct pieces* piece, struct pieces* destination)
-{
-    switch(piece->type)
-    {
-        case PAWN:
-        return checkPossiblePawn(piece, destination);
-        break;
-        case KNIGHT:
-        return checkPossibleKnight(piece, destination);
-        break;
-        case BISHOP:
-        //return checkPossibleBishop(piece, destination);
-        break;
-        case ROOK:
-        //return checkPossibleRook(piece, destination);
-        break;
-        case QUEEN:
-        //return checkPossibleQueen(piece, destination);
-        break;
-        case KING:
-        //return checkPossibleKing(piece, destination);
-        break;
-    }
-    return false;
-}
-
-bool checkPossiblePawn(struct pieces* piece, struct pieces* destination)
-{
-    if(!piece->canMove)
-    {
-        return false;
-    }
-    if(destination->column > piece->column+1 || destination->column < piece->column-1)
-    {
-        return false;
-    }
-    if(piece->color == BLACK)
-    {
-        if(destination->column != piece->column && destination->line == piece->line+1)
-        {
-            if(destination->color == piece->color)
-            {
-                return false;
-            }
-            else
-            {
-                if(destination->color == EMPTY)
-                {
-                    if((destination - COLUMNS)->type == PAWN && (destination - COLUMNS)->justMoved)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    return true;
-                }
-            }
-        }
-        if(destination->line <= piece->line)
-        {
-            return false;
-        }
-        if(piece->hasMoved)
-        {
-            if(destination->line > piece->line+1)
-            {
-                return false;
-            }
-        }
-        else
-        {
-            if(destination->line > piece->line+2)
-            {
-                return false;
-            }
-            if(destination->line == piece->line+2)
-            {
-                if(destination->column != piece->column)
-                {
-                    return false;
-                }
-                if((destination - COLUMNS)->color != EMPTY)
-                {
-                    return false;
-                }
-            }
-        }
-    }
-    if(piece->color == WHITE)
-    {
-        if(destination->column != piece->column && destination->line == piece->line-1)
-        {
-            if(destination->color == piece->color)
-            {
-                return false;
-            }
-            else
-            {
-                if(destination->color == EMPTY)
-                {
-                    if((destination + COLUMNS)->type == PAWN && (destination + COLUMNS)->justMoved)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    return true;
-                }
-            }
-        }
-        if(destination->line >= piece->line)
-        {
-            return false;
-        }
-        if(piece->hasMoved)
-        {
-            if(destination->line < piece->line-1)
-            {
-                return false;
-            }
-        }
-        else
-        {
-            if(destination->line < piece->line-2)
-            {
-                return false;
-            }
-            if(destination->line == piece->line-2)
-            {
-                if(destination->column != piece->column)
-                {
-                    return false;
-                }
-                if((destination + COLUMNS)->color != EMPTY)
-                {
-                    return false;
-                }
-            }
-        }
-    }
-    if(destination->color != EMPTY)
-    {
-        return false;
-    }
-    else
-    {
-        return true;
-    }
-}
-
-bool checkPossibleKnight(struct pieces* piece, struct pieces* destination)
-{
-    if(!piece->canMove)
-    {
-        return false;
-    }
-    if(destination->line > piece->line+2 || destination->line < piece->line-2)
-    {
-        return false;
-    }
-    if(destination->column > piece->column+2 || destination->column < piece->column-2)
-    {
-        return false;
-    }
-    if(destination->line == piece->line || destination->column == piece->column)
-    {
-        return false;
-    }
-    if(abs(destination->line - piece->line) == abs(destination->column - piece->column))
-    {
-        return false;
-    }
-    if(destination->type != EMPTY)
-    {
-        if(destination->color == piece->color)
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
-    else
-    {
-        return true;
-    }
-}
-
-void enPassant()
-{
+    movePiece(piecePointer, destinationPointer, board);
+    checkCheck(board, turnIndexPointer);
     
+    return;
 }
