@@ -27,876 +27,1072 @@
 
 int ch;
 struct pieces {
-    char representation[CHARACTERS];
-    int type;
-    int color;
-    int line;
-    int column;
-    bool hasMoved;
-    bool canMove;
-    bool justMoved;
+	char representation[CHARACTERS];
+	int type;
+	int color;
+	int line;
+	int column;
+	bool hasMoved;
+	bool canMove;
+	bool justMoved;
+	bool checking;
 };
 
 void printBoard(struct pieces board[LINES][COLUMNS]);
 void movePiece(struct pieces* piece, struct pieces* destination, struct pieces board[LINES][COLUMNS]);
-void checkCheck(struct pieces board[LINES][COLUMNS], int* turnIndex);
-void checkCheckStraight(struct pieces* piece);
-void checkCheckDiagonal(struct pieces* piece);
-void checkCheckKnight(struct pieces* piece);
-void checkCheckPawn(struct pieces* piece);
+int checkCheck(struct pieces* piece);
+int checkCheckStraight(struct pieces* piece);
+int checkCheckDiagonal(struct pieces* piece);
+int checkCheckKnight(struct pieces* piece);
+int checkCheckPawn(struct pieces* piece);
+int checkCheckType(struct pieces* piece);
+void singleCheckProtocol(struct pieces board[LINES][COLUMNS], int* turnIndex, struct pieces* piece);
+void multipleCheckProtocol(struct pieces board[LINES][COLUMNS], int* turnIndex);
 void turn(struct pieces board[LINES][COLUMNS], int* turnCounter);
 bool checkPossible(struct pieces* piece, struct pieces* destination);
 bool checkPossiblePawn(struct pieces* piece, struct pieces* destination);
 bool checkPossibleKnight(struct pieces* piece, struct pieces* destination);
+bool checkPossibleBishop(struct pieces* piece, struct pieces* destination);
+bool checkPossibleRook(struct pieces* piece, struct pieces* destination);
+bool checkPossibleQueen(struct pieces* piece, struct pieces* destination);
+bool checkPossibleKing(struct pieces* piece, struct pieces* destination);
+bool checkKingCanMove(struct pieces board[LINES][COLUMNS], struct pieces* piece);
+void enPassant(struct pieces* piece, struct pieces* destination);
+void piecesCantMove(struct pieces board[LINES][COLUMNS], int* turnIndex);
+void clearTemporary(struct pieces board[LINES][COLUMNS]);
 
 int main()
 {
-    struct pieces board[LINES][COLUMNS] = {
-        {
-            {"Rk1", ROOK, BLACK, 1, 1, false, true, false},
-            {"Kt1", KNIGHT, BLACK, 1, 2, false, true, false},
-            {"Bp1", BISHOP, BLACK, 1, 3, false, true, false},
-            {"Kg1", KING, BLACK, 1, 4, false, true, false},
-            {"Qn1", QUEEN, BLACK, 1, 5, false, true, false},
-            {"Bp2", BISHOP, BLACK, 1, 6, false, true, false},
-            {"Kt2", KNIGHT, BLACK, 1, 7, false, true, false},
-            {"Rk2", ROOK, BLACK, 1, 8, false, true, false},
-        },
-        {
-            {"Pn1", PAWN, BLACK, 2, 1, false, true, false},
-            {"Pn2", PAWN, BLACK, 2, 2, false, true, false},
-            {"Pn3", PAWN, BLACK, 2, 3, false, true, false},
-            {"Pn4", PAWN, BLACK, 2, 4, false, true, false},
-            {"Pn5", PAWN, BLACK, 2, 5, false, true, false},
-            {"Pn6", PAWN, BLACK, 2, 6, false, true, false},
-            {"Pn7", PAWN, BLACK, 2, 7, false, true, false},
-            {"Pn8", PAWN, BLACK, 2, 8, false, true, false},
-        },
-        {
-            {"   ", EMPTY, EMPTY, 3, 1, false, false, false},
-            {"   ", EMPTY, EMPTY, 3, 2, false, false, false},
-            {"   ", EMPTY, EMPTY, 3, 3, false, false, false},
-            {"   ", EMPTY, EMPTY, 3, 4, false, false, false},
-            {"   ", EMPTY, EMPTY, 3, 5, false, false, false},
-            {"   ", EMPTY, EMPTY, 3, 6, false, false, false},
-            {"   ", EMPTY, EMPTY, 3, 7, false, false, false},
-            {"   ", EMPTY, EMPTY, 3, 8, false, false, false},
-        },
-        {
-            {"   ", EMPTY, EMPTY, 4, 1, false, false, false},
-            {"   ", EMPTY, EMPTY, 4, 2, false, false, false},
-            {"   ", EMPTY, EMPTY, 4, 3, false, false, false},
-            {"   ", EMPTY, EMPTY, 4, 4, false, false, false},
-            {"   ", EMPTY, EMPTY, 4, 5, false, false, false},
-            {"   ", EMPTY, EMPTY, 4, 6, false, false, false},
-            {"   ", EMPTY, EMPTY, 4, 7, false, false, false},
-            {"   ", EMPTY, EMPTY, 4, 8, false, false, false},
-        },
-        {
-            {"   ", EMPTY, EMPTY, 5, 1, false, false, false},
-            {"   ", EMPTY, EMPTY, 5, 2, false, false, false},
-            {"   ", EMPTY, EMPTY, 5, 3, false, false, false},
-            {"   ", EMPTY, EMPTY, 5, 4, false, false, false},
-            {"   ", EMPTY, EMPTY, 5, 5, false, false, false},
-            {"   ", EMPTY, EMPTY, 5, 6, false, false, false},
-            {"   ", EMPTY, EMPTY, 5, 7, false, false, false},
-            {"   ", EMPTY, EMPTY, 5, 8, false, false, false},
-        },
-        {
-            {"   ", EMPTY, EMPTY, 6, 1, false, false, false},
-            {"   ", EMPTY, EMPTY, 6, 2, false, false, false},
-            {"   ", EMPTY, EMPTY, 6, 3, false, false, false},
-            {"   ", EMPTY, EMPTY, 6, 4, false, false, false},
-            {"   ", EMPTY, EMPTY, 6, 5, false, false, false},
-            {"   ", EMPTY, EMPTY, 6, 6, false, false, false},
-            {"   ", EMPTY, EMPTY, 6, 7, false, false, false},
-            {"   ", EMPTY, EMPTY, 6, 8, false, false, false},
-        },
-        {
-            {"Pn1", PAWN, WHITE, 7, 1, false, true, false},
-            {"Pn2", PAWN, WHITE, 7, 2, false, true, false},
-            {"Pn3", PAWN, WHITE, 7, 3, false, true, false},
-            {"Pn4", PAWN, WHITE, 7, 4, false, true, false},
-            {"Pn5", PAWN, WHITE, 7, 5, false, true, false},
-            {"Pn6", PAWN, WHITE, 7, 6, false, true, false},
-            {"Pn7", PAWN, WHITE, 7, 7, false, true, false},
-            {"Pn8", PAWN, WHITE, 7, 8, false, true, false},
-        },
-        {
-            {"Rk1", ROOK, WHITE, 8, 1, false, true, false},
-            {"Kt1", KNIGHT, WHITE, 8, 2, false, true, false},
-            {"Bp1", BISHOP, WHITE, 8, 3, false, true, false},
-            {"Kg1", KING, WHITE, 8, 4, false, true, false},
-            {"Qn1", QUEEN, WHITE, 8, 5, false, true, false},
-            {"Bp2", BISHOP, WHITE, 8, 6, false, true, false},
-            {"Kt2", KNIGHT, WHITE, 8, 7, false, true, false},
-            {"Rk2", ROOK, WHITE, 8, 8, false, true, false},
-        }
-    };
-    
-    int turnCounter, loop;
-    turnCounter = 0;
-    int* turnCounterPointer = &turnCounter;
-    loop = 0;
-    
-    printBoard(board);
-    
-    while(loop == 0)
-    {
-        turn(board, turnCounterPointer);
-        printf("Leave?\n");
-        scanf("%i",&loop);
-    }
-    
-    fflush(stdin);
-    return 0;
+	struct pieces board[LINES][COLUMNS] = {
+		{
+			{"Rk1", ROOK, BLACK, 1, 1, false, true, false, false},
+			{"Kt1", KNIGHT, BLACK, 1, 2, false, true, false, false},
+			{"Bp1", BISHOP, BLACK, 1, 3, false, true, false, false},
+			{"Kg1", KING, BLACK, 1, 4, false, true, false, false},
+			{"Qn1", QUEEN, BLACK, 1, 5, false, true, false, false},
+			{"Bp2", BISHOP, BLACK, 1, 6, false, true, false, false},
+			{"Kt2", KNIGHT, BLACK, 1, 7, false, true, false, false},
+			{"Rk2", ROOK, BLACK, 1, 8, false, true, false, false},
+		},
+		{
+			{"Pn1", PAWN, BLACK, 2, 1, false, true, false, false},
+			{"Pn2", PAWN, BLACK, 2, 2, false, true, false, false},
+			{"Pn3", PAWN, BLACK, 2, 3, false, true, false, false},
+			{"Pn4", PAWN, BLACK, 2, 4, false, true, false, false},
+			{"Pn5", PAWN, BLACK, 2, 5, false, true, false, false},
+			{"Pn6", PAWN, BLACK, 2, 6, false, true, false, false},
+			{"Pn7", PAWN, BLACK, 2, 7, false, true, false, false},
+			{"Pn8", PAWN, BLACK, 2, 8, false, true, false, false},
+		},
+		{
+			{"   ", EMPTY, EMPTY, 3, 1, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 3, 2, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 3, 3, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 3, 4, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 3, 5, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 3, 6, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 3, 7, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 3, 8, false, false, false, false},
+		},
+		{
+			{"   ", EMPTY, EMPTY, 4, 1, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 4, 2, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 4, 3, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 4, 4, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 4, 5, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 4, 6, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 4, 7, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 4, 8, false, false, false, false},
+		},
+		{
+			{"   ", EMPTY, EMPTY, 5, 1, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 5, 2, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 5, 3, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 5, 4, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 5, 5, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 5, 6, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 5, 7, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 5, 8, false, false, false, false},
+		},
+		{
+			{"   ", EMPTY, EMPTY, 6, 1, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 6, 2, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 6, 3, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 6, 4, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 6, 5, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 6, 6, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 6, 7, false, false, false, false},
+			{"   ", EMPTY, EMPTY, 6, 8, false, false, false, false},
+		},
+		{
+			{"Pn1", PAWN, WHITE, 7, 1, false, true, false, false},
+			{"Pn2", PAWN, WHITE, 7, 2, false, true, false, false},
+			{"Pn3", PAWN, WHITE, 7, 3, false, true, false, false},
+			{"Pn4", PAWN, WHITE, 7, 4, false, true, false, false},
+			{"Pn5", PAWN, WHITE, 7, 5, false, true, false, false},
+			{"Pn6", PAWN, WHITE, 7, 6, false, true, false, false},
+			{"Pn7", PAWN, WHITE, 7, 7, false, true, false, false},
+			{"Pn8", PAWN, WHITE, 7, 8, false, true, false, false},
+		},
+		{
+			{"Rk1", ROOK, WHITE, 8, 1, false, true, false, false},
+			{"Kt1", KNIGHT, WHITE, 8, 2, false, true, false, false},
+			{"Bp1", BISHOP, WHITE, 8, 3, false, true, false, false},
+			{"Kg1", KING, WHITE, 8, 4, false, true, false, false},
+			{"Qn1", QUEEN, WHITE, 8, 5, false, true, false, false},
+			{"Bp2", BISHOP, WHITE, 8, 6, false, true, false, false},
+			{"Kt2", KNIGHT, WHITE, 8, 7, false, true, false, false},
+			{"Rk2", ROOK, WHITE, 8, 8, false, true, false, false},
+		}
+	};
+
+	int turnCounter, loop;
+	turnCounter = 0;
+	int* turnCounterPointer = &turnCounter;
+	loop = 0;
+
+	printBoard(board);
+
+	while(loop == 0)
+	{
+		turn(board, turnCounterPointer);
+		printf("Leave?\n");
+		scanf("%i",&loop);
+	}
+
+	fflush(stdin);
+	return 0;
 }
 
-void printBoard(struct pieces board[LINES][COLUMNS]){
-    
-    char borders[BORDERS][CHARACTERS] = {
-    RESET " |", RESET "8|", RESET "7|", RESET "6|", RESET "5|", RESET "4|", RESET "3|", RESET "2|", RESET "1|",  RESET "|"
-    };
-    char line[100], index[100], primarySquare[CHARACTERS], secondarySquare[CHARACTERS];
-    char* pieceColor;
-    int counter;
-    
-    strcpy(line, RESET "  --------------------------------------------------------");
-    strcpy(index, RESET "     a      b      c      d      e      f      g      h");
-  
-    printf("\n%s\n",line);
-    for(int i=0;i<LINES;i++)
-    {
-        counter = 0;
-        printf("%s",borders[0]);
-        if(i%2 == 0)
-        {
-            strcpy(primarySquare, LIGHTBACKGROUND "  ");
-            strcpy(secondarySquare, DARKBACKGROUND "  ");
-        }
-        else
-        {
-            strcpy(primarySquare, DARKBACKGROUND "  ");
-            strcpy(secondarySquare, LIGHTBACKGROUND "  ");
-        }
-        for(counter=counter;counter<COLUMNS/2;counter++)
-        {
-            printf("%s     %s     ",primarySquare, secondarySquare);
-        }
-        printf("%s",borders[BORDERS-1]);
-        printf("\n");
-        printf("%s",borders[i+1]);
-        for(int j=0;j<COLUMNS;j++)
-        {
-            if(board[i][j].color == BLACK)
-            {
-                pieceColor = BLACKPIECES;
-            }
-            else
-            {
-                pieceColor = WHITEPIECES;
-            }
-            if(j%2 == 0)
-            {
-                printf("%s%s%s%s",primarySquare, pieceColor, board[i][j].representation, primarySquare);
-            }
-            else
-            {
-                printf("%s%s%s%s",secondarySquare, pieceColor, board[i][j].representation, secondarySquare);
-            }
-        }
-        counter = 0;
-        printf("%s",borders[BORDERS-1]);
-        printf("\n");
-        printf("%s",borders[0]);
-        for(counter=counter;counter<COLUMNS/2;counter++)
-        {
-            printf("%s     %s     ",primarySquare, secondarySquare);
-        }
-        printf("%s\n",borders[BORDERS-1]);
-    }
-    printf("%s", line);
-    printf("\n%s\n\n",index);
-    
-    counter=0;
-    
-    return;
+void printBoard(struct pieces board[LINES][COLUMNS]) {
+
+	char borders[BORDERS][CHARACTERS] = {
+		RESET " |", RESET "8|", RESET "7|", RESET "6|", RESET "5|", RESET "4|", RESET "3|", RESET "2|", RESET "1|",  RESET "|"
+	};
+	char line[100], index[100], primarySquare[CHARACTERS], secondarySquare[CHARACTERS];
+	char* pieceColor;
+	int counter;
+
+	strcpy(line, RESET "  --------------------------------------------------------");
+	strcpy(index, RESET "     a      b      c      d      e      f      g      h");
+
+	printf("\n%s\n",line);
+	for(int i=0; i<LINES; i++)
+	{
+		counter = 0;
+		printf("%s",borders[0]);
+		if(i%2 == 0)
+		{
+			strcpy(primarySquare, LIGHTBACKGROUND "  ");
+			strcpy(secondarySquare, DARKBACKGROUND "  ");
+		}
+		else
+		{
+			strcpy(primarySquare, DARKBACKGROUND "  ");
+			strcpy(secondarySquare, LIGHTBACKGROUND "  ");
+		}
+		for(counter=counter; counter<COLUMNS/2; counter++)
+		{
+			printf("%s     %s     ",primarySquare, secondarySquare);
+		}
+		printf("%s",borders[BORDERS-1]);
+		printf("\n");
+		printf("%s",borders[i+1]);
+		for(int j=0; j<COLUMNS; j++)
+		{
+			if(board[i][j].color == BLACK)
+			{
+				pieceColor = BLACKPIECES;
+			}
+			else
+			{
+				pieceColor = WHITEPIECES;
+			}
+			if(j%2 == 0)
+			{
+				printf("%s%s%s%s",primarySquare, pieceColor, board[i][j].representation, primarySquare);
+			}
+			else
+			{
+				printf("%s%s%s%s",secondarySquare, pieceColor, board[i][j].representation, secondarySquare);
+			}
+		}
+		counter = 0;
+		printf("%s",borders[BORDERS-1]);
+		printf("\n");
+		printf("%s",borders[0]);
+		for(counter=counter; counter<COLUMNS/2; counter++)
+		{
+			printf("%s     %s     ",primarySquare, secondarySquare);
+		}
+		printf("%s\n",borders[BORDERS-1]);
+	}
+	printf("%s", line);
+	printf("\n%s\n\n",index);
+
+	counter=0;
+
+	return;
 }
 
 void movePiece(struct pieces* piece, struct pieces* destination, struct pieces board[LINES][COLUMNS])
 {
-    strcpy(destination->representation, piece->representation);
-    strcpy(piece->representation, "   ");
-    destination->type = piece->type;
-    piece->type = EMPTY;
-    destination->color = piece->color;
-    piece->color = EMPTY;
-    
-    piece->canMove = false;
-    piece->hasMoved = false;
-    piece->justMoved = false;
-    destination->canMove = true;
-    destination->hasMoved = true;
-    destination->justMoved = true;
-    
-    printBoard(board);
+	strcpy(destination->representation, piece->representation);
+	strcpy(piece->representation, "   ");
+	destination->type = piece->type;
+	piece->type = EMPTY;
+	destination->color = piece->color;
+	piece->color = EMPTY;
+
+	piece->canMove = false;
+	piece->hasMoved = false;
+	piece->justMoved = false;
+	destination->canMove = true;
+	destination->hasMoved = true;
+	destination->justMoved = true;
+
+	printBoard(board);
 }
 
-void checkCheckStraight(struct pieces* piece)
+int checkCheckStraight(struct pieces* piece)
 {
-    for(int i=1;i<(LINES-(piece->line-1));i++)
-    {
-        if(((piece + COLUMNS*i)->type == ROOK || (piece + COLUMNS*i)->type == QUEEN) && (piece + COLUMNS*i)->color != piece->color)
-        {
-            printf("Rook/Queen check\n");
-            return;
-        }
-        else
-        {
-            if((piece + COLUMNS*i)->color == piece->color)
-            {
-                break;
-            }
-            if((piece + COLUMNS*i)->color != EMPTY && (piece + COLUMNS*i)->type != ROOK && (piece + COLUMNS*i)->type != QUEEN)
-            {
-                break;
-            }
-        }
-    }
-    for(int i=1;i<(0+piece->line);i++)
-    {
-        if(((piece - COLUMNS*i)->type == ROOK || (piece - COLUMNS*i)->type == QUEEN) && (piece - COLUMNS*i)->color != piece->color)
-        {
-            printf("Rook/Queen check\n");
-            return;
-        }
-        else
-        {
-            if((piece - COLUMNS*i)->color == piece->color)
-            {
-                break;
-            }
-            if((piece - COLUMNS*i)->color != EMPTY && (piece - COLUMNS*i)->type != ROOK && (piece - COLUMNS*i)->type != QUEEN)
-            {
-                break;
-            }
-        }
-    }
-    for(int i=1;i<(COLUMNS-(piece->column-1));i++)
-    {
-        if(((piece + i)->type == ROOK || (piece + i)->type == QUEEN) && (piece + i)->color != piece->color)
-        {
-            printf("Rook/Queen check\n");
-            return;
-        }
-        else
-        {
-            if((piece + i)->color == piece->color)
-            {
-                break;
-            }
-            if((piece + i)->color != EMPTY && (piece + i)->type != ROOK && (piece + i)->type != QUEEN)
-            {
-                break;
-            }
-        }
-    }
-    for(int i=1;i<(0+piece->column);i++)
-    {
-        if(((piece - i)->type == ROOK || (piece - i)->type == QUEEN) && (piece - i)->color != piece->color)
-        {
-            printf("Rook/Queen check\n");
-            return;
-        }
-        else
-        {
-            if((piece - i)->color == piece->color)
-            {
-                break;
-            }
-            if((piece - i)->color != EMPTY && (piece - i)->type != ROOK && (piece - i)->type != QUEEN)
-            {
-                break;
-            }
-        }
-    }
+    int checks = 0;
     
-    return;
+	for(int i=1; i<(LINES-(piece->line-1)); i++)
+	{
+		if(((piece + COLUMNS*i)->type == ROOK || (piece + COLUMNS*i)->type == QUEEN) && (piece + COLUMNS*i)->color != piece->color)
+		{
+		    (piece + COLUMNS*i)->checking = true;
+			checks++;
+			break;
+		}
+		else
+		{
+			if((piece + COLUMNS*i)->color == piece->color)
+			{
+				break;
+			}
+			if((piece + COLUMNS*i)->color != EMPTY && (piece + COLUMNS*i)->type != ROOK && (piece + COLUMNS*i)->type != QUEEN)
+			{
+				break;
+			}
+		}
+	}
+	for(int i=1; i<(0+piece->line); i++)
+	{
+		if(((piece - COLUMNS*i)->type == ROOK || (piece - COLUMNS*i)->type == QUEEN) && (piece - COLUMNS*i)->color != piece->color)
+		{
+		    (piece - COLUMNS*i)->checking = true;
+			checks++;
+			break;
+		}
+		else
+		{
+			if((piece - COLUMNS*i)->color == piece->color)
+			{
+				break;
+			}
+			if((piece - COLUMNS*i)->color != EMPTY && (piece - COLUMNS*i)->type != ROOK && (piece - COLUMNS*i)->type != QUEEN)
+			{
+				break;
+			}
+		}
+	}
+	for(int i=1; i<(COLUMNS-(piece->column-1)); i++)
+	{
+		if(((piece + i)->type == ROOK || (piece + i)->type == QUEEN) && (piece + i)->color != piece->color)
+		{
+		    (piece + i)->checking = true;
+			checks++;
+			break;
+		}
+		else
+		{
+			if((piece + i)->color == piece->color)
+			{
+				break;
+			}
+			if((piece + i)->color != EMPTY && (piece + i)->type != ROOK && (piece + i)->type != QUEEN)
+			{
+				break;
+			}
+		}
+	}
+	for(int i=1; i<(0+piece->column); i++)
+	{
+		if(((piece - i)->type == ROOK || (piece - i)->type == QUEEN) && (piece - i)->color != piece->color)
+		{
+		    (piece - i)->checking = true;
+			checks++;
+			break;
+		}
+		else
+		{
+			if((piece - i)->color == piece->color)
+			{
+				break;
+			}
+			if((piece - i)->color != EMPTY && (piece - i)->type != ROOK && (piece - i)->type != QUEEN)
+			{
+				break;
+			}
+		}
+	}
+
+	return checks;
 }
 
-void checkCheckDiagonal(struct pieces* piece)
+int checkCheckDiagonal(struct pieces* piece)
 {
-    int limit;
-    
-    if(piece->column <= piece->line)
-    {
-        limit = piece->line-1;
-    }
-    else
-    {
-        limit = piece->column-1;
-    }
-    
-    for(int i=1;i<(LINES-limit);i++)
-    {
-        if(((piece + ((COLUMNS*i)+i))->type == BISHOP || (piece + ((COLUMNS*i)+i))->type == QUEEN) && (piece + ((COLUMNS*i)+i))->color != piece->color)
-        {
-            printf("Bishop/Queen check\n");
-            return;
-        }
-        else
-        {
-            if((piece + ((COLUMNS*i)+i))->color == piece->color)
-            {
-                break;
-            }
-            if((piece + ((COLUMNS*i)+i))->color != EMPTY && (piece + ((COLUMNS*i)+i))->type != BISHOP && (piece + ((COLUMNS*i)+i))->type != QUEEN)
-            {
-                break;
-            }
-        }
-    }
-    
-    if(piece->line + piece->column >= COLUMNS+1)
-    {
-        limit = piece->line-1;
-    }
-    else
-    {
-        limit = COLUMNS - piece->column;
-    }
-    
-    for(int i=1;i<(LINES-limit);i++)
-    {
-        if(((piece + ((COLUMNS*i)-i))->type == BISHOP || (piece + ((COLUMNS*i)-i))->type == QUEEN) && (piece + ((COLUMNS*i)-i))->color != piece->color)
-        {
-            printf("Bishop/Queen check\n");
-            return;
-        }
-        else
-        {
-            if((piece + ((COLUMNS*i)-i))->color == piece->color)
-            {
-                break;
-            }
-            if((piece + ((COLUMNS*i)-i))->color != EMPTY && (piece + ((COLUMNS*i)-i))->type != BISHOP && (piece + ((COLUMNS*i)-i))->type != QUEEN)
-            {
-                break;
-            }
-        }
-    }
-    
-    if(piece->column >= piece->line)
-    {
-        limit = piece->line-1;
-    }
-    else
-    {
-        limit = piece->column-1;
-    }
-    
-    for(int i=1;i<(1+limit);i++)
-    {
-        if(((piece - ((COLUMNS*i)+i))->type == BISHOP || (piece - ((COLUMNS*i)+i))->type == QUEEN) && (piece - ((COLUMNS*i)+i))->color != piece->color)
-        {
-            printf("Bishop/Queen check\n");
-            return;
-        }
-        else
-        {
-            if((piece - ((COLUMNS*i)+i))->color == piece->color)
-            {
-                break;
-            }
-            if((piece - ((COLUMNS*i)+i))->color != EMPTY && (piece - ((COLUMNS*i)+i))->type != BISHOP && (piece - ((COLUMNS*i)+i))->type != QUEEN)
-            {
-                break;
-            }
-        }
-    }
-    
-    if(piece->line + piece->column >= COLUMNS+1)
-    {
-        limit = COLUMNS - piece->column;
-    }
-    else
-    {
-        limit = piece->line-1;
-    }
-    
-    for(int i=1;i<(1+limit);i++)
-    {
-        if(((piece - ((COLUMNS*i)-i))->type == BISHOP || (piece - ((COLUMNS*i)-i))->type == QUEEN) && (piece - ((COLUMNS*i)-i))->color != piece->color)
-        {
-            printf("Bishop/Queen check\n");
-            return;
-        }
-        else
-        {
-            if((piece - ((COLUMNS*i)-i))->color == piece->color)
-            {
-                break;
-            }
-            if((piece - ((COLUMNS*i)-i))->color != EMPTY && (piece - ((COLUMNS*i)-i))->type != BISHOP && (piece - ((COLUMNS*i)-i))->type != QUEEN)
-            {
-                break;
-            }
-        }
-    }
-    
-    return;
+	int limit, checks;
+	checks = 0;
+
+	if(piece->column <= piece->line)
+	{
+		limit = piece->line-1;
+	}
+	else
+	{
+		limit = piece->column-1;
+	}
+
+	for(int i=1; i<(LINES-limit); i++)
+	{
+		if(((piece + ((COLUMNS*i)+i))->type == BISHOP || (piece + ((COLUMNS*i)+i))->type == QUEEN) && (piece + ((COLUMNS*i)+i))->color != piece->color)
+		{
+		    (piece + ((COLUMNS*i)+i))->checking = true;
+			checks++;
+			break;
+		}
+		else
+		{
+			if((piece + ((COLUMNS*i)+i))->color == piece->color)
+			{
+				break;
+			}
+			if((piece + ((COLUMNS*i)+i))->color != EMPTY && (piece + ((COLUMNS*i)+i))->type != BISHOP && (piece + ((COLUMNS*i)+i))->type != QUEEN)
+			{
+				break;
+			}
+		}
+	}
+
+	if(piece->line + piece->column >= COLUMNS+1)
+	{
+		limit = piece->line-1;
+	}
+	else
+	{
+		limit = COLUMNS - piece->column;
+	}
+
+	for(int i=1; i<(LINES-limit); i++)
+	{
+		if(((piece + ((COLUMNS*i)-i))->type == BISHOP || (piece + ((COLUMNS*i)-i))->type == QUEEN) && (piece + ((COLUMNS*i)-i))->color != piece->color)
+		{
+		    (piece + ((COLUMNS*i)-i))->checking = true;
+			checks++;
+			break;
+		}
+		else
+		{
+			if((piece + ((COLUMNS*i)-i))->color == piece->color)
+			{
+				break;
+			}
+			if((piece + ((COLUMNS*i)-i))->color != EMPTY && (piece + ((COLUMNS*i)-i))->type != BISHOP && (piece + ((COLUMNS*i)-i))->type != QUEEN)
+			{
+				break;
+			}
+		}
+	}
+
+	if(piece->column >= piece->line)
+	{
+		limit = piece->line-1;
+	}
+	else
+	{
+		limit = piece->column-1;
+	}
+
+	for(int i=1; i<(1+limit); i++)
+	{
+		if(((piece - ((COLUMNS*i)+i))->type == BISHOP || (piece - ((COLUMNS*i)+i))->type == QUEEN) && (piece - ((COLUMNS*i)+i))->color != piece->color)
+		{
+		    (piece - ((COLUMNS*i)+i))->checking = true;
+			checks++;
+			break;
+		}
+		else
+		{
+			if((piece - ((COLUMNS*i)+i))->color == piece->color)
+			{
+				break;
+			}
+			if((piece - ((COLUMNS*i)+i))->color != EMPTY && (piece - ((COLUMNS*i)+i))->type != BISHOP && (piece - ((COLUMNS*i)+i))->type != QUEEN)
+			{
+				break;
+			}
+		}
+	}
+
+	if(piece->line + piece->column >= COLUMNS+1)
+	{
+		limit = COLUMNS - piece->column;
+	}
+	else
+	{
+		limit = piece->line-1;
+	}
+
+	for(int i=1; i<(1+limit); i++)
+	{
+		if(((piece - ((COLUMNS*i)-i))->type == BISHOP || (piece - ((COLUMNS*i)-i))->type == QUEEN) && (piece - ((COLUMNS*i)-i))->color != piece->color)
+		{
+		    (piece - ((COLUMNS*i)-i))->checking = true;
+			checks++;
+			break;
+		}
+		else
+		{
+			if((piece - ((COLUMNS*i)-i))->color == piece->color)
+			{
+				break;
+			}
+			if((piece - ((COLUMNS*i)-i))->color != EMPTY && (piece - ((COLUMNS*i)-i))->type != BISHOP && (piece - ((COLUMNS*i)-i))->type != QUEEN)
+			{
+				break;
+			}
+		}
+	}
+
+	return checks;
 }
 
-void checkCheckKnight(struct pieces* piece)
+int checkCheckKnight(struct pieces* piece)
 {
-    if((piece - COLUMNS - 2)->type == KNIGHT && (piece - COLUMNS - 2)->color != piece->color)
-    {
-        printf("Knight check\n");
-        return;
-    }
+    int checks = 0;
     
-    if((piece - COLUMNS + 2)->type == KNIGHT && (piece - COLUMNS + 2)->color != piece->color)
-    {
-        printf("Knight check\n");
-        return;
-    }
-    
-    if((piece + COLUMNS - 2)->type == KNIGHT && (piece + COLUMNS - 2)->color != piece->color)
-    {
-        printf("Knight check\n");
-        return;
-    }
-    
-    if((piece + COLUMNS + 2)->type == KNIGHT && (piece + COLUMNS + 2)->color != piece->color)
-    {
-        printf("Knight check\n");
-        return;
-    }
-    
-    if((piece - 2*COLUMNS - 1)->type == KNIGHT && (piece - 2*COLUMNS - 1)->color != piece->color)
-    {
-        printf("Knight check\n");
-        return;
-    }
-    
-    if((piece - 2*COLUMNS + 1)->type == KNIGHT && (piece - 2*COLUMNS + 1)->color != piece->color)
-    {
-        printf("Knight check\n");
-        return;
-    }
-    
-    if((piece + 2*COLUMNS - 1)->type == KNIGHT && (piece + 2*COLUMNS - 1)->color != piece->color)
-    {
-        printf("Knight check\n");
-        return;
-    }
-    
-    if((piece + 2*COLUMNS + 1)->type == KNIGHT && (piece + 2*COLUMNS + 1)->color != piece->color)
-    {
-        printf("Knight check\n");
-        return;
-    }
-    
-    return;
+	if((piece - COLUMNS - 2)->type == KNIGHT && (piece - COLUMNS - 2)->color != piece->color)
+	{
+	    (piece - COLUMNS - 2)->checking = true;
+		checks++;
+	}
+
+	if((piece - COLUMNS + 2)->type == KNIGHT && (piece - COLUMNS + 2)->color != piece->color)
+	{
+	    (piece - COLUMNS + 2)->checking = true;
+		checks++;
+	}
+
+	if((piece + COLUMNS - 2)->type == KNIGHT && (piece + COLUMNS - 2)->color != piece->color)
+	{
+	    (piece + COLUMNS - 2)->checking = true;
+		checks++;
+	}
+
+	if((piece + COLUMNS + 2)->type == KNIGHT && (piece + COLUMNS + 2)->color != piece->color)
+	{
+	    (piece + COLUMNS + 2)->checking = true;
+		checks++;
+	}
+
+	if((piece - 2*COLUMNS - 1)->type == KNIGHT && (piece - 2*COLUMNS - 1)->color != piece->color)
+	{
+	    (piece - 2*COLUMNS - 1)->checking = true;
+		checks++;
+	}
+
+	if((piece - 2*COLUMNS + 1)->type == KNIGHT && (piece - 2*COLUMNS + 1)->color != piece->color)
+	{
+	    (piece - 2*COLUMNS + 1)->checking = true;
+		checks++;
+	}
+
+	if((piece + 2*COLUMNS - 1)->type == KNIGHT && (piece + 2*COLUMNS - 1)->color != piece->color)
+	{
+	    (piece + 2*COLUMNS - 1)->checking = true;
+		checks++;
+	}
+
+	if((piece + 2*COLUMNS + 1)->type == KNIGHT && (piece + 2*COLUMNS + 1)->color != piece->color)
+	{
+	    (piece + 2*COLUMNS + 1)->checking = true;
+		checks++;
+	}
+
+	return checks;
 }
 
-void checkCheckPawn(struct pieces* piece)
+int checkCheckPawn(struct pieces* piece)
 {
-    if(piece->color == BLACK)
-    {
-        if((piece + COLUMNS + 1)->type == PAWN && (piece + COLUMNS + 1)->color != piece->color)
-        {
-            printf("Pawn check\n");
-            return;
-        }
-        if((piece + COLUMNS - 1)->type == PAWN && (piece + COLUMNS - 1)->color != piece->color)
-        {
-            printf("Pawn check\n");
-            return;
-        }
-    }
-    else
-    {
-        if((piece - COLUMNS + 1)->type == PAWN && (piece - COLUMNS + 1)->color != piece->color)
-        {
-            printf("Pawn check\n");
-            return;
-        }
-        if((piece - COLUMNS - 1)->type == PAWN && (piece - COLUMNS - 1)->color != piece->color)
-        {
-            printf("Pawn check\n");
-            return;
-        }
-    }
+    int checks = 0;
+    
+	if(piece->color == BLACK)
+	{
+		if((piece + COLUMNS + 1)->type == PAWN && (piece + COLUMNS + 1)->color != piece->color)
+		{
+		    (piece + COLUMNS + 1)->checking = true;
+			checks++;
+		}
+		if((piece + COLUMNS - 1)->type == PAWN && (piece + COLUMNS - 1)->color != piece->color)
+		{
+		    (piece + COLUMNS - 1)->checking = true;
+			checks++;
+		}
+	}
+	else
+	{
+		if((piece - COLUMNS + 1)->type == PAWN && (piece - COLUMNS + 1)->color != piece->color)
+		{
+		    (piece - COLUMNS + 1)->checking = true;
+			checks++;
+		}
+		if((piece - COLUMNS - 1)->type == PAWN && (piece - COLUMNS - 1)->color != piece->color)
+		{
+		    (piece - COLUMNS - 1)->checking = true;
+			checks++;
+		}
+	}
+	
+	return checks;
 }
 
-void checkCheck(struct pieces board[LINES][COLUMNS], int* turnIndex)
+int checkCheck(struct pieces* piece)
 {
-    bool pieceFound;
-    struct pieces* piecePointer;
-    char kingRepresentation[CHARACTERS];
-    
-    strcpy(kingRepresentation, "Kg1");
-    
-    for(int i=0;i<LINES;i++)
-    {
-        for(int j=0;j<COLUMNS;j++)
-        {
-            if(strcmp(kingRepresentation, board[i][j].representation) == 0 && *turnIndex != board[i][j].color)
-            {
-                piecePointer = &board[i][j];
-                pieceFound = true;
-                break;
-            }
-            else
-            {
-                pieceFound = false;
-            }
-        }
-        if(pieceFound)
-        {
-            break;
-        }
-    }
-    
-    checkCheckStraight(piecePointer);
-    checkCheckDiagonal(piecePointer);
-    checkCheckKnight(piecePointer);
-    checkCheckPawn(piecePointer);
-    
-    return;
+	return checkCheckStraight(piece)+checkCheckDiagonal(piece)+checkCheckKnight(piece)+checkCheckPawn(piece);
 }
 
 void turn(struct pieces board[LINES][COLUMNS], int* turnCounter)
 {
-    bool pieceFound;
-    int turnIndex, destinationLine, destinationColumn;
-    char movedPiece[CHARACTERS], destinationNotation[CHARACTERS];
-    int* turnIndexPointer = &turnIndex;
-    struct pieces* piecePointer;
-    struct pieces* destinationPointer;
-    
-    if(*turnCounter%2 == 0)
-    {
-        printf("White's turn to move!\n");
-        turnIndex = WHITE;
-    }
-    else
-    {
-        printf("Black's turn to move!\n");
-        turnIndex = BLACK;
-    }
-    
-    printf("\nWhat piece would you like to move?\n");
-    printf("Type it's representation\n");
-    printf("(e.g: 'Qn1' for the queen)\n");
-    scanf("%s",movedPiece);
-    
-    for(int i=0;i<LINES;i++)
-    {
-        for(int j=0;j<COLUMNS;j++)
+	bool pieceFound;
+	int turnIndex, destinationLine, destinationColumn;
+	char movedPiece[CHARACTERS], destinationNotation[CHARACTERS];
+	int* turnIndexPointer = &turnIndex;
+	struct pieces* piecePointer;
+	struct pieces* destinationPointer;
+
+	if(*turnCounter%2 == 0)
+	{
+		printf("White's turn to move!\n");
+		turnIndex = WHITE;
+	}
+	else
+	{
+		printf("Black's turn to move!\n");
+		turnIndex = BLACK;
+	}
+
+	printf("\nWhat piece would you like to move?\n");
+	printf("Type it's representation\n");
+	printf("(e.g: 'Qn1' for the queen)\n");
+	scanf("%s",movedPiece);
+
+	for(int i=0; i<LINES; i++)
+	{
+		for(int j=0; j<COLUMNS; j++)
+		{
+			if(strcmp(movedPiece, board[i][j].representation) == 0 && turnIndex == board[i][j].color)
+			{
+				printf("Piece found!\n");
+				piecePointer = &board[i][j];
+				pieceFound = true;
+				break;
+			}
+			else
+			{
+				pieceFound = false;
+			}
+		}
+		if(pieceFound)
+		{
+			break;
+		}
+	}
+
+	if(!pieceFound)
+	{
+		printf("Piece not found!\n");
+		return;
+	}
+
+	printf("\nWhere would you like to move it to?\n");
+	printf("Type it's notation\n");
+	printf("(e.g: 'a1' for the bottom-left corner square)\n");
+	scanf("%s", destinationNotation);
+
+	switch(destinationNotation[0])
+	{
+	case 'a':
+		destinationColumn = 0;
+		break;
+	case 'b':
+		destinationColumn = 1;
+		break;
+	case 'c':
+		destinationColumn = 2;
+		break;
+	case 'd':
+		destinationColumn = 3;
+		break;
+	case 'e':
+		destinationColumn = 4;
+		break;
+	case 'f':
+		destinationColumn = 5;
+		break;
+	case 'g':
+		destinationColumn = 6;
+		break;
+	case 'h':
+		destinationColumn = 7;
+		break;
+	default:
+		printf("Informed column doesn't exist!\n");
+		printf("(Columns are: a-h)");
+		return;
+	}
+
+	switch(destinationNotation[1])
+	{
+	case '8':
+		destinationLine = 0;
+		break;
+	case '7':
+		destinationLine = 1;
+		break;
+	case '6':
+		destinationLine = 2;
+		break;
+	case '5':
+		destinationLine = 3;
+		break;
+	case '4':
+		destinationLine = 4;
+		break;
+	case '3':
+		destinationLine = 5;
+		break;
+	case '2':
+		destinationLine = 6;
+		break;
+	case '1':
+		destinationLine = 7;
+		break;
+	default:
+		printf("Informed line doesn't exist!\n");
+		printf("(Lines are: 1-8)");
+		return;
+	}
+	destinationPointer = &board[destinationLine][destinationColumn];
+
+	if(!checkPossible(piecePointer, destinationPointer))
+	{
+		printf("Impossible move!\n");
+		return;
+	}
+	else
+	{
+		*turnCounter = *turnCounter+1;
+		
+		clearJustMoved(board);
+		movePiece(piecePointer, destinationPointer, board);
+		
+		for(int i=0; i<LINES; i++)
         {
-            if(strcmp(movedPiece, board[i][j].representation) == 0 && turnIndex == board[i][j].color)
+            for(int j=0; j<COLUMNS; j++)
             {
-                printf("Piece found!\n");
-                piecePointer = &board[i][j];
-                pieceFound = true;
+                if(strcmp("Kg1", board[i][j].representation) == 0 && turnIndex != board[i][j].color)
+                {
+                    piecePointer = &board[i][j];
+                    pieceFound = true;
+                    break;
+                }
+                else
+                {
+                    pieceFound = false;
+                }
+            }
+            if(pieceFound)
+            {
                 break;
+            }
+        }
+        
+		if(checkCheck(piecePointer) >= 1)
+		{
+            if(checkCheck(piecePointer) == 1)
+            {
+                //singleCheckProtocol(board, turnIndexPointer, piecePointer);    
             }
             else
             {
-                pieceFound = false;
+                multipleCheckProtocol(board, turnIndexPointer);
             }
-        }
-        if(pieceFound)
-        {
-            break;
-        }
-    }
-    
-    if(!pieceFound)
-    {
-        printf("Piece not found!\n");
-        return;
-    }
-    
-    printf("\nWhere would you like to move it to?\n");
-    printf("Type it's notation\n");
-    printf("(e.g: 'a1' for the bottom-left corner square)\n");
-    scanf("%s", destinationNotation);
-    
-    switch(destinationNotation[0])
-    {
-        case 'a':
-        destinationColumn = 0;
-        break;
-        case 'b':
-        destinationColumn = 1;
-        break;
-        case 'c':
-        destinationColumn = 2;
-        break;
-        case 'd':
-        destinationColumn = 3;
-        break;
-        case 'e':
-        destinationColumn = 4;
-        break;
-        case 'f':
-        destinationColumn = 5;
-        break;
-        case 'g':
-        destinationColumn = 6;
-        break;
-        case 'h':
-        destinationColumn = 7;
-        break;
-        default:
-        printf("Informed column doesn't exist!\n");
-        printf("(Columns are: a-h)");
-        return;
-    }
-    
-    switch(destinationNotation[1])
-    {
-        case '8':
-        destinationLine = 0;
-        break;
-        case '7':
-        destinationLine = 1;
-        break;
-        case '6':
-        destinationLine = 2;
-        break;
-        case '5':
-        destinationLine = 3;
-        break;
-        case '4':
-        destinationLine = 4;
-        break;
-        case '3':
-        destinationLine = 5;
-        break;
-        case '2':
-        destinationLine = 6;
-        break;
-        case '1':
-        destinationLine = 7;
-        break;
-        default:
-        printf("Informed line doesn't exist!\n");
-        printf("(Lines are: 1-8)");
-        return;
-    }
-    destinationPointer = &board[destinationLine][destinationColumn];
-    
-    if(!checkPossible(piecePointer, destinationPointer))
-    {
-        printf("Impossible move!\n");
-        return;
-    }
-    else
-    {
-        *turnCounter = *turnCounter+1;
-        
-        movePiece(piecePointer, destinationPointer, board);
-        checkCheck(board, turnIndexPointer);
-        return;
-    }
+		}
+		return;
+	}
 }
 
 bool checkPossible(struct pieces* piece, struct pieces* destination)
 {
-    switch(piece->type)
-    {
-        case PAWN:
-        return checkPossiblePawn(piece, destination);
-        break;
-        case KNIGHT:
-        return checkPossibleKnight(piece, destination);
-        break;
-        case BISHOP:
-        //return checkPossibleBishop(piece, destination);
-        break;
-        case ROOK:
-        //return checkPossibleRook(piece, destination);
-        break;
-        case QUEEN:
-        //return checkPossibleQueen(piece, destination);
-        break;
-        case KING:
-        //return checkPossibleKing(piece, destination);
-        break;
-    }
-    return false;
+	switch(piece->type)
+	{
+	case PAWN:
+		return checkPossiblePawn(piece, destination);
+		break;
+	case KNIGHT:
+		return checkPossibleKnight(piece, destination);
+		break;
+	case BISHOP:
+		return checkPossibleBishop(piece, destination);
+		break;
+	case ROOK:
+		return checkPossibleRook(piece, destination);
+		break;
+	case QUEEN:
+		return checkPossibleQueen(piece, destination);
+		break;
+	case KING:
+		return checkPossibleKing(piece, destination);
+		break;
+	}
+	return false;
 }
 
 bool checkPossiblePawn(struct pieces* piece, struct pieces* destination)
 {
-    if(!piece->canMove)
-    {
-        return false;
-    }
-    if(destination->column > piece->column+1 || destination->column < piece->column-1)
-    {
-        return false;
-    }
-    if(piece->color == BLACK)
-    {
-        if(destination->column != piece->column && destination->line == piece->line+1)
-        {
-            if(destination->color == piece->color)
-            {
-                return false;
-            }
-            else
-            {
-                if(destination->color == EMPTY)
-                {
-                    if((destination - COLUMNS)->type == PAWN && (destination - COLUMNS)->justMoved)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    return true;
-                }
-            }
-        }
-        if(destination->line <= piece->line)
-        {
-            return false;
-        }
-        if(piece->hasMoved)
-        {
-            if(destination->line > piece->line+1)
-            {
-                return false;
-            }
-        }
-        else
-        {
-            if(destination->line > piece->line+2)
-            {
-                return false;
-            }
-            if(destination->line == piece->line+2)
-            {
-                if(destination->column != piece->column)
-                {
-                    return false;
-                }
-                if((destination - COLUMNS)->color != EMPTY)
-                {
-                    return false;
-                }
-            }
-        }
-    }
-    if(piece->color == WHITE)
-    {
-        if(destination->column != piece->column && destination->line == piece->line-1)
-        {
-            if(destination->color == piece->color)
-            {
-                return false;
-            }
-            else
-            {
-                if(destination->color == EMPTY)
-                {
-                    if((destination + COLUMNS)->type == PAWN && (destination + COLUMNS)->justMoved)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    return true;
-                }
-            }
-        }
-        if(destination->line >= piece->line)
-        {
-            return false;
-        }
-        if(piece->hasMoved)
-        {
-            if(destination->line < piece->line-1)
-            {
-                return false;
-            }
-        }
-        else
-        {
-            if(destination->line < piece->line-2)
-            {
-                return false;
-            }
-            if(destination->line == piece->line-2)
-            {
-                if(destination->column != piece->column)
-                {
-                    return false;
-                }
-                if((destination + COLUMNS)->color != EMPTY)
-                {
-                    return false;
-                }
-            }
-        }
-    }
-    if(destination->color != EMPTY)
-    {
-        return false;
-    }
-    else
-    {
-        return true;
-    }
+	if(!piece->canMove)
+	{
+		return false;
+	}
+	if(destination->column > piece->column+1 || destination->column < piece->column-1)
+	{
+		return false;
+	}
+	if(piece->color == BLACK)
+	{
+		if(destination->column != piece->column && destination->line == piece->line+1)
+		{
+			if(destination->color == piece->color)
+			{
+				return false;
+			}
+			else
+			{
+				if(destination->color == EMPTY)
+				{
+					if((destination - COLUMNS)->type == PAWN && (destination - COLUMNS)->justMoved)
+					{
+						enPassant(piece, destination);
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+				}
+				else
+				{
+					return true;
+				}
+			}
+		}
+		if(destination->line <= piece->line)
+		{
+			return false;
+		}
+		if(piece->hasMoved)
+		{
+			if(destination->line > piece->line+1)
+			{
+				return false;
+			}
+		}
+		else
+		{
+			if(destination->line > piece->line+2)
+			{
+				return false;
+			}
+			if(destination->line == piece->line+2)
+			{
+				if(destination->column != piece->column)
+				{
+					return false;
+				}
+				if((destination - COLUMNS)->color != EMPTY)
+				{
+					return false;
+				}
+			}
+		}
+	}
+	if(piece->color == WHITE)
+	{
+		if(destination->column != piece->column && destination->line == piece->line-1)
+		{
+			if(destination->color == piece->color)
+			{
+				return false;
+			}
+			else
+			{
+				if(destination->color == EMPTY)
+				{
+					if((destination + COLUMNS)->type == PAWN && (destination + COLUMNS)->justMoved)
+					{
+						enPassant(piece, destination);
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+				}
+				else
+				{
+					return true;
+				}
+			}
+		}
+		if(destination->line >= piece->line)
+		{
+			return false;
+		}
+		if(piece->hasMoved)
+		{
+			if(destination->line < piece->line-1)
+			{
+				return false;
+			}
+		}
+		else
+		{
+			if(destination->line < piece->line-2)
+			{
+				return false;
+			}
+			if(destination->line == piece->line-2)
+			{
+				if(destination->column != piece->column)
+				{
+					return false;
+				}
+				if((destination + COLUMNS)->color != EMPTY)
+				{
+					return false;
+				}
+			}
+		}
+	}
+	if(destination->color != EMPTY)
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
 }
 
 bool checkPossibleKnight(struct pieces* piece, struct pieces* destination)
 {
+	if(!piece->canMove)
+	{
+		return false;
+	}
+	if(destination->line > piece->line+2 || destination->line < piece->line-2)
+	{
+		return false;
+	}
+	if(destination->column > piece->column+2 || destination->column < piece->column-2)
+	{
+		return false;
+	}
+	if(destination->line == piece->line || destination->column == piece->column)
+	{
+		return false;
+	}
+	if(abs(destination->line - piece->line) == abs(destination->column - piece->column))
+	{
+		return false;
+	}
+	if(destination->type != EMPTY)
+	{
+		if(destination->color == piece->color)
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+	else
+	{
+		return true;
+	}
+}
+
+bool checkPossibleBishop(struct pieces* piece, struct pieces* destination)
+{
+	if(!piece->canMove)
+	{
+		return false;
+	}
+	if(abs(destination->line - piece->line) != abs(destination->column - piece->column))
+	{
+		return false;
+	}
+	if(destination->line == piece->line && destination->column == piece->column)
+	{
+		return false;
+	}
+	if(destination->color == piece->color)
+	{
+		return false;
+	}
+	if(destination->line > piece->line && destination->column > piece->column)
+	{
+		for(int i=1;i<(destination->line - piece->line)+1;i++)
+		{
+			if((piece + ((COLUMNS*i)+i))->line != destination->line)
+			{
+				if((piece + ((COLUMNS*i)+i))->color != EMPTY)
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	if(destination->line > piece->line && destination->column < piece->column)
+	{
+		for(int i=1;i<(destination->line - piece->line)+1;i++)
+		{
+			if((piece + ((COLUMNS*i)-i))->line != destination->line)
+			{
+				if((piece + ((COLUMNS*i)-i))->color != EMPTY)
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	if(destination->line < piece->line && destination->column < piece->column)
+	{
+		for(int i=1;i<(piece->line - destination->line)+1;i++)
+		{
+			if((piece - ((COLUMNS*i)+i))->line != destination->line)
+			{
+				if((piece - ((COLUMNS*i)+i))->color != EMPTY)
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	if(destination->line < piece->line && destination->column > piece->column)
+	{
+		for(int i=1;i<(piece->line - destination->line)+1;i++)
+		{
+			if((piece - ((COLUMNS*i)-i))->line != destination->line)
+			{
+				if((piece - ((COLUMNS*i)-i))->color != EMPTY)
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+}
+
+bool checkPossibleRook(struct pieces* piece, struct pieces* destination)
+{
     if(!piece->canMove)
-    {
+	{
+		return false;
+	}
+	if(destination->line == piece->line && destination->column == piece->column)
+	{
+		return false;
+	}
+	if(destination->color == piece->color)
+	{
+		return false;
+	}
+	if(destination->line != piece->line && destination->column != piece->column)
+	{
         return false;
-    }
-    if(destination->line > piece->line+2 || destination->line < piece->line-2)
-    {
-        return false;
-    }
-    if(destination->column > piece->column+2 || destination->column < piece->column-2)
-    {
-        return false;
-    }
-    if(destination->line == piece->line || destination->column == piece->column)
-    {
-        return false;
-    }
-    if(abs(destination->line - piece->line) == abs(destination->column - piece->column))
-    {
-        return false;
-    }
-    if(destination->type != EMPTY)
-    {
-        if(destination->color == piece->color)
+	}
+	if(destination->line > piece->line)
+	{
+        for(int i=1;i<(destination->line - piece->line)+1;i++)
         {
-            return false;
+            if((piece + (COLUMNS*i))->line != destination->line)
+            {
+                if((piece + (COLUMNS*i))->color != EMPTY)
+                {
+                    return false;
+                }
+            }
         }
-        else
+        return true;
+	}
+	if(destination->line < piece->line)
+	{
+        for(int i=1;i<(piece->line - destination->line)+1;i++)
         {
-            return true;
+            if((piece - (COLUMNS*i))->line != destination->line)
+            {
+                if((piece - (COLUMNS*i))->color != EMPTY)
+                {
+                    return false;
+                }
+            }
         }
+        return true;
+	}
+	if(destination->column > piece->column)
+	{
+        for(int i=1;i<(destination->column - piece->column);i++)
+        {
+            if((piece + i)->column != destination->column)
+            {
+                if((piece + i)->color != EMPTY)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+	}
+	if(destination->column < piece->column)
+	{
+        for(int i=1;i<(piece->column - destination->column);i++)
+        {
+            if((piece - i)->column != destination->column)
+            {
+                if((piece - i)->color != EMPTY)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+	}
+}
+
+bool checkPossibleQueen(struct pieces* piece, struct pieces* destination)
+{
+    if(!checkPossibleBishop(piece, destination))
+    {
+        return checkPossibleRook(piece, destination);
     }
     else
     {
@@ -904,7 +1100,224 @@ bool checkPossibleKnight(struct pieces* piece, struct pieces* destination)
     }
 }
 
-void enPassant()
+bool checkPossibleKing(struct pieces* piece, struct pieces* destination)
 {
+    int colorReserve;
     
+    if(!piece->canMove)
+	{
+		return false;
+	}
+	if(destination->line == piece->line && destination->column == piece->column)
+	{
+		return false;
+	}
+	if(destination->color == piece->color)
+	{
+		return false;
+	}
+	if(destination->line > piece->line+1 || destination->column > piece->column+1)
+	{
+        return false;
+	}
+	if(destination->line < piece->line-1 || destination->column < piece->column-1)
+	{
+        return false;
+	}
+	
+	colorReserve = destination->color;
+	destination->color = piece->color;
+	
+	if(checkCheck(destination) > 0)
+	{
+	    destination->color = colorReserve;
+	    return false;
+	}
+	else
+	{
+	    destination->color = colorReserve;
+	    return true;
+	}
+}
+
+bool checkKingCanMove(struct pieces board[LINES][COLUMNS], struct pieces* piece)
+{
+    int kingLine, kingColumn;
+    struct pieces* destinationPointer;
+    
+    for(int i=0; i<LINES; i++)
+	{
+		for(int j=0; j<COLUMNS; j++)
+		{
+            if(board[i][j].color == piece->color && board[i][j].type == KING)
+            {
+                kingLine = i;
+                kingColumn = j;
+                break;
+            }
+		}
+	}
+	
+	destinationPointer = &board[kingLine][kingColumn+1];
+    if(checkPossibleKing(piece, destinationPointer))
+    {
+        return true;
+    }
+    destinationPointer = &board[kingLine][kingColumn-1];
+    if(checkPossibleKing(piece, destinationPointer))
+    {
+        return true;
+    }
+    destinationPointer = &board[kingLine+1][kingColumn];
+    if(checkPossibleKing(piece, destinationPointer))
+    {
+        return true;
+    }
+    destinationPointer = &board[kingLine-1][kingColumn];
+    if(checkPossibleKing(piece, destinationPointer))
+    {
+        return true;
+    }
+    destinationPointer = &board[kingLine+1][kingColumn+1];
+    if(checkPossibleKing(piece, destinationPointer))
+    {
+        return true;
+    }
+    destinationPointer = &board[kingLine-1][kingColumn+1];
+    if(checkPossibleKing(piece, destinationPointer))
+    {
+        return true;
+    }
+    destinationPointer = &board[kingLine+1][kingColumn-1];
+    if(checkPossibleKing(piece, destinationPointer))
+    {
+        return true;
+    }
+    destinationPointer = &board[kingLine-1][kingColumn-1];
+    if(checkPossibleKing(piece, destinationPointer))
+    {
+        return true;
+    }
+    
+    piece->canMove = false;
+    return false;
+}
+
+void multipleCheckProtocol(struct pieces board[LINES][COLUMNS], int* turnIndex)
+{
+    struct pieces* piecePointer;
+    
+    piecesCantMove(board, turnIndex);
+	
+	for(int i=0; i<LINES; i++)
+	{
+		for(int j=0; j<COLUMNS; j++)
+		{
+            if(board[i][j].color != *turnIndex && board[i][j].type == KING)
+            {
+                piecePointer = &board[i][j];
+                break;
+            }
+		}
+	}
+	
+	if(!checkKingCanMove(board, piecePointer))
+	{
+        printf("Check Mate!");
+        exit(0);
+	}
+	else
+	{
+        return;
+	}
+}
+
+void singleCheckProtocol(struct pieces board[LINES][COLUMNS], int* turnIndex, struct pieces* piece)
+{
+    piecesCantMove(board, turnIndex);
+    
+    switch(checkCheckType(piece))
+    {
+        case BISHOP:
+        
+        break;
+        case ROOK:
+        break;
+        case KNIGHT:
+        break;
+        case PAWN:
+        break;
+    }
+}
+
+void enPassant(struct pieces* piece, struct pieces* destination)
+{
+	if(piece->color == WHITE)
+	{
+		strcpy((destination + COLUMNS)->representation, "   ");
+		(destination + COLUMNS)->type = EMPTY;
+		(destination + COLUMNS)->color = EMPTY;
+		(destination + COLUMNS)->canMove = false;
+		(destination + COLUMNS)->hasMoved = false;
+		(destination + COLUMNS)->justMoved = false;
+	}
+	else
+	{
+		strcpy((destination - COLUMNS)->representation, "   ");
+		(destination - COLUMNS)->type = EMPTY;
+		(destination - COLUMNS)->color = EMPTY;
+		(destination - COLUMNS)->canMove = false;
+		(destination - COLUMNS)->hasMoved = false;
+		(destination - COLUMNS)->justMoved = false;
+	}
+
+	return;
+}
+
+void piecesCantMove(struct pieces board[LINES][COLUMNS], int* turnIndex)
+{
+    for(int i=0; i<LINES; i++)
+	{
+		for(int j=0; j<COLUMNS; j++)
+		{
+            if(board[i][j].color != *turnIndex && board[i][j].type != KING)
+            {
+                board[i][j].canMove = false;
+            }
+		}
+	}
+	
+	return;
+}
+
+void clearJustMoved(struct pieces board[LINES][COLUMNS])
+{
+	for(int i=0; i<LINES; i++)
+	{
+		for(int j=0; j<COLUMNS; j++)
+		{
+			board[i][j].justMoved = false;
+			board[i][j].checking = false;
+		}
+	}
+}
+
+int checkCheckType(struct pieces* piece)
+{
+    if(checkCheckDiagonal(piece) > 0)
+    {
+        return BISHOP;
+    }
+    if(checkCheckStraight(piece) > 0)
+    {
+        return ROOK;
+    }
+    if(checkCheckKnight(piece) > 0)
+    {
+        return KNIGHT;
+    }
+    if(checkCheckPawn(piece) > 0)
+    {
+        return PAWN;
+    }
 }
