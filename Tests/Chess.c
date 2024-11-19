@@ -52,6 +52,8 @@ void turn(struct pieces board[LINES][COLUMNS], int* turnCounter);
 bool checkPossible(struct pieces* piece, struct pieces* destination, struct pieces board[LINES][COLUMNS]);
 bool checkPossiblePawn(struct pieces* piece, struct pieces* destination, struct pieces board[LINES][COLUMNS]);
 bool checkPossibleKnight(struct pieces* piece, struct pieces* destination, struct pieces board[LINES][COLUMNS]);
+bool checkPossibleDiagonal(struct pieces* piece, struct pieces* destination, struct pieces board[LINES][COLUMNS]);
+bool checkPossibleStraight(struct pieces* piece, struct pieces* destination, struct pieces board[LINES][COLUMNS]);
 bool checkPossibleBishop(struct pieces* piece, struct pieces* destination, struct pieces board[LINES][COLUMNS]);
 bool checkPossibleRook(struct pieces* piece, struct pieces* destination, struct pieces board[LINES][COLUMNS]);
 bool checkPossibleQueen(struct pieces* piece, struct pieces* destination, struct pieces board[LINES][COLUMNS]);
@@ -64,8 +66,10 @@ bool checkCaptureProtocol(struct pieces board[LINES][COLUMNS]);
 bool checkBlockDiagonalProtocol(struct pieces board[LINES][COLUMNS]);
 bool checkBlockStraightProtocol(struct pieces board[LINES][COLUMNS]);
 void bringBackPiece(struct pieces* temporaryPiece, struct pieces* piece);
+void undoMove(struct pieces* piece, struct pieces* destination, struct pieces* temporaryPiece, struct pieces* temporaryDestination);
 bool checkPossibleCheck(struct pieces* piece, struct pieces* destination, struct pieces board[LINES][COLUMNS]);
 void promotion(struct pieces* piece);
+void undoMove(struct pieces* piece, struct pieces* destination, struct pieces* temporaryPiece, struct pieces* temporaryDestination);
 
 int main()
 {
@@ -878,7 +882,7 @@ bool checkPossiblePawn(struct pieces* piece, struct pieces* destination, struct 
 				{
 					if(destination->line == 8)
 					{
-						//promotion(piece);
+						promotion(piece);
 					}
 					return true;
 				}
@@ -940,7 +944,7 @@ bool checkPossiblePawn(struct pieces* piece, struct pieces* destination, struct 
 				{
 					if(destination->line == 1)
 					{
-						//promotion(piece);
+						promotion(piece);
 					}
 					return true;
 				}
@@ -984,11 +988,11 @@ bool checkPossiblePawn(struct pieces* piece, struct pieces* destination, struct 
 	{
 		if(destination->line == 8 && piece->color == BLACK)
 		{
-			//promotion(piece);
+			promotion(piece);
 		}
 		if(destination->line == 1 && piece->color == WHITE)
 		{
-			//promotion(piece);
+			promotion(piece);
 		}
 		return true;
 	}
@@ -1037,12 +1041,8 @@ bool checkPossibleKnight(struct pieces* piece, struct pieces* destination, struc
 	}
 }
 
-bool checkPossibleBishop(struct pieces* piece, struct pieces* destination, struct pieces board[LINES][COLUMNS])
+bool checkPossibleDiagonal(struct pieces* piece, struct pieces* destination, struct pieces board[LINES][COLUMNS])
 {
-	/*if(!checkPossibleCheck(piece, destination, board))
-	{
-		return false;
-	}*/
 	if(!piece->canMove)
 	{
 		return false;
@@ -1117,12 +1117,27 @@ bool checkPossibleBishop(struct pieces* piece, struct pieces* destination, struc
 	}
 }
 
-bool checkPossibleRook(struct pieces* piece, struct pieces* destination, struct pieces board[LINES][COLUMNS])
+bool checkPossibleBishop(struct pieces* piece, struct pieces* destination, struct pieces board[LINES][COLUMNS])
 {
-	/*if(!checkPossibleCheck(piece, destination, board))
+	if(!checkPossibleCheck(piece, destination, board))
 	{
-		return false;
-	}*/
+	    return false;
+	}
+	else
+	{
+	    if(!checkPossibleDiagonal(piece, destination, board))
+	    {
+	        return false;
+	    }
+	    else
+	    {
+	        return true;
+	    }
+	}
+}
+
+bool checkPossibleStraight(struct pieces* piece, struct pieces* destination, struct pieces board[LINES][COLUMNS])
+{
 	if(!piece->canMove)
 	{
 		return false;
@@ -1197,11 +1212,34 @@ bool checkPossibleRook(struct pieces* piece, struct pieces* destination, struct 
 	}
 }
 
+bool checkPossibleRook(struct pieces* piece, struct pieces* destination, struct pieces board[LINES][COLUMNS])
+{
+	if(!checkPossibleCheck(piece, destination, board))
+	{
+	    return false;
+	}
+	else
+	{
+	    if(!checkPossibleStraight(piece, destination, board))
+	    {
+	        return false;
+	    }
+	    else
+	    {
+	        return true;
+	    }
+	}
+}
+
 bool checkPossibleQueen(struct pieces* piece, struct pieces* destination, struct pieces board[LINES][COLUMNS])
 {
-	if(!checkPossibleBishop(piece, destination, board))
+    if(!checkPossibleCheck(piece, destination, board))
 	{
-		return checkPossibleRook(piece, destination, board);
+	    return false;
+	}
+	if(!checkPossibleDiagonal(piece, destination, board))
+	{
+		return checkPossibleStraight(piece, destination, board);
 	}
 	else
 	{
@@ -1744,19 +1782,23 @@ bool checkPossibleCheck(struct pieces* piece, struct pieces* destination, struct
 
 	if(checkCheck(kingPointer) >= 1)
 	{
-		bringBackPiece(temporaryPiecePointer, piece);
-		bringBackPiece(temporaryDestinationPointer, destination);
+		undoMove(piece, destination, temporaryPiecePointer, temporaryDestinationPointer);
 		return false;
 	}
 	else
 	{
-		bringBackPiece(temporaryPiecePointer, piece);
-		bringBackPiece(temporaryDestinationPointer, destination);
+		undoMove(piece, destination, temporaryPiecePointer, temporaryDestinationPointer);
 		return true;
 	}
 }
 
-/*void promotion(struct pieces* piece)
+void undoMove(struct pieces* piece, struct pieces* destination, struct pieces* temporaryPiece, struct pieces* temporaryDestination)
+{
+    bringBackPiece(temporaryPiece, piece);
+	bringBackPiece(temporaryDestination, destination);
+}
+
+void promotion(struct pieces* piece)
 {
 	int promotionPiece, promotionCounterBlack, promotionCounterWhite, promotionNumber;
 	char promotionDigit, promotionType[CHARACTERS];
@@ -1846,4 +1888,4 @@ bool checkPossibleCheck(struct pieces* piece, struct pieces* destination, struct
 		promotionCounterWhite++;
 	}
 	return;
-}*/
+}
