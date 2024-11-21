@@ -70,6 +70,8 @@ void undoMove(struct pieces* piece, struct pieces* destination, struct pieces* t
 bool checkPossibleCheck(struct pieces* piece, struct pieces* destination, struct pieces board[LINES][COLUMNS]);
 void promotion(struct pieces* piece);
 void undoMove(struct pieces* piece, struct pieces* destination, struct pieces* temporaryPiece, struct pieces* temporaryDestination);
+void longCastling(struct pieces* destination);
+void shortCastling(struct pieces* destination);
 
 int main()
 {
@@ -490,56 +492,56 @@ int checkCheckKnight(struct pieces* piece)
 {
 	int checks = 0;
 
-	if((piece - COLUMNS - 2)->type == KNIGHT && (piece - COLUMNS - 2)->color != piece->color)
+	if((piece - COLUMNS - 2)->type == KNIGHT && (piece - COLUMNS - 2)->color != piece->color && piece->line > 1 && piece->column > 2)
 	{
 		(piece - COLUMNS - 2)->canMove = true;
 		(piece - COLUMNS - 2)->checking = true;
 		checks++;
 	}
 
-	if((piece - COLUMNS + 2)->type == KNIGHT && (piece - COLUMNS + 2)->color != piece->color)
+	if((piece - COLUMNS + 2)->type == KNIGHT && (piece - COLUMNS + 2)->color != piece->color && piece->line > 1 && piece->column < 7)
 	{
 		(piece - COLUMNS + 2)->canMove = true;
 		(piece - COLUMNS + 2)->checking = true;
 		checks++;
 	}
 
-	if((piece + COLUMNS - 2)->type == KNIGHT && (piece + COLUMNS - 2)->color != piece->color)
+	if((piece + COLUMNS - 2)->type == KNIGHT && (piece + COLUMNS - 2)->color != piece->color && piece->line < 8 && piece->column > 2)
 	{
 		(piece + COLUMNS - 2)->canMove = true;
 		(piece + COLUMNS - 2)->checking = true;
 		checks++;
 	}
 
-	if((piece + COLUMNS + 2)->type == KNIGHT && (piece + COLUMNS + 2)->color != piece->color)
+	if((piece + COLUMNS + 2)->type == KNIGHT && (piece + COLUMNS + 2)->color != piece->color && piece->line < 8 && piece->column < 7)
 	{
 		(piece + COLUMNS + 2)->canMove = true;
 		(piece + COLUMNS + 2)->checking = true;
 		checks++;
 	}
 
-	if((piece - 2*COLUMNS - 1)->type == KNIGHT && (piece - 2*COLUMNS - 1)->color != piece->color)
+	if((piece - 2*COLUMNS - 1)->type == KNIGHT && (piece - 2*COLUMNS - 1)->color != piece->color && piece->line > 2 && piece->column > 1)
 	{
 		(piece - 2*COLUMNS - 1)->canMove = true;
 		(piece - 2*COLUMNS - 1)->checking = true;
 		checks++;
 	}
 
-	if((piece - 2*COLUMNS + 1)->type == KNIGHT && (piece - 2*COLUMNS + 1)->color != piece->color)
+	if((piece - 2*COLUMNS + 1)->type == KNIGHT && (piece - 2*COLUMNS + 1)->color != piece->color && piece->line > 2 && piece->column < 8)
 	{
 		(piece - 2*COLUMNS + 1)->canMove = true;
 		(piece - 2*COLUMNS + 1)->checking = true;
 		checks++;
 	}
 
-	if((piece + 2*COLUMNS - 1)->type == KNIGHT && (piece + 2*COLUMNS - 1)->color != piece->color)
+	if((piece + 2*COLUMNS - 1)->type == KNIGHT && (piece + 2*COLUMNS - 1)->color != piece->color && piece->line < 7 && piece->column > 1)
 	{
 		(piece + 2*COLUMNS - 1)->canMove = true;
 		(piece + 2*COLUMNS - 1)->checking = true;
 		checks++;
 	}
 
-	if((piece + 2*COLUMNS + 1)->type == KNIGHT && (piece + 2*COLUMNS + 1)->color != piece->color)
+	if((piece + 2*COLUMNS + 1)->type == KNIGHT && (piece + 2*COLUMNS + 1)->color != piece->color && piece->line < 7 && piece->column < 8)
 	{
 		(piece + 2*COLUMNS + 1)->canMove = true;
 		(piece + 2*COLUMNS + 1)->checking = true;
@@ -598,12 +600,14 @@ int checkCheckPawn(struct pieces* piece)
 		{
 			if((piece + COLUMNS + 1)->type == PAWN && (piece + COLUMNS + 1)->color != piece->color && piece->column != 8)
 			{
+			    printf("PAWNA");
 				(piece + COLUMNS + 1)->canMove = true;
 				(piece + COLUMNS + 1)->checking = true;
 				checks++;
 			}
 			if((piece + COLUMNS - 1)->type == PAWN && (piece + COLUMNS - 1)->color != piece->color && piece->column != 1)
 			{
+			    printf("PAWNB");
 				(piece + COLUMNS - 1)->canMove = true;
 				(piece + COLUMNS - 1)->checking = true;
 				checks++;
@@ -1121,18 +1125,18 @@ bool checkPossibleBishop(struct pieces* piece, struct pieces* destination, struc
 {
 	if(!checkPossibleCheck(piece, destination, board))
 	{
-	    return false;
+		return false;
 	}
 	else
 	{
-	    if(!checkPossibleDiagonal(piece, destination, board))
-	    {
-	        return false;
-	    }
-	    else
-	    {
-	        return true;
-	    }
+		if(!checkPossibleDiagonal(piece, destination, board))
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
 	}
 }
 
@@ -1216,26 +1220,26 @@ bool checkPossibleRook(struct pieces* piece, struct pieces* destination, struct 
 {
 	if(!checkPossibleCheck(piece, destination, board))
 	{
-	    return false;
+		return false;
 	}
 	else
 	{
-	    if(!checkPossibleStraight(piece, destination, board))
-	    {
-	        return false;
-	    }
-	    else
-	    {
-	        return true;
-	    }
+		if(!checkPossibleStraight(piece, destination, board))
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
 	}
 }
 
 bool checkPossibleQueen(struct pieces* piece, struct pieces* destination, struct pieces board[LINES][COLUMNS])
 {
-    if(!checkPossibleCheck(piece, destination, board))
+	if(!checkPossibleCheck(piece, destination, board))
 	{
-	    return false;
+		return false;
 	}
 	if(!checkPossibleDiagonal(piece, destination, board))
 	{
@@ -1249,7 +1253,7 @@ bool checkPossibleQueen(struct pieces* piece, struct pieces* destination, struct
 
 bool checkPossibleKing(struct pieces* piece, struct pieces* destination)
 {
-	int temporaryColor;
+	int temporaryColor, temporaryType;
 
 	if(!piece->canMove)
 	{
@@ -1263,25 +1267,107 @@ bool checkPossibleKing(struct pieces* piece, struct pieces* destination)
 	{
 		return false;
 	}
-	if(destination->line > piece->line+1 || destination->column > piece->column+1)
+	if(destination->line > piece->line+1 || destination->line < piece->line-1)
 	{
 		return false;
 	}
-	if(destination->line < piece->line-1 || destination->column < piece->column-1)
+	if(destination->column > piece->column+1 || destination->column < piece->column-1)
 	{
+		if(checkCheck(piece) > 0)
+		{
+			return false;
+		}
+		if(destination->column > piece->column+2 || destination->column < piece->column-2)
+		{
+			return false;
+		}
+		else
+		{
+			if(piece->hasMoved)
+			{
+				return false;
+			}
+			temporaryType = destination->type;
+			destination->type = piece->type;
+			temporaryColor = destination->color;
+			destination->color = piece->color;
+			if(checkCheck(destination) > 0)
+			{
+				destination->type = temporaryType;
+				destination->color = temporaryColor;
+				return false;
+			}
+			else
+			{
+			    destination->type = temporaryType;
+				destination->color = temporaryColor;
+				if(destination->column > piece->column)
+				{
+					if((destination - 1)->color != EMPTY || destination->color != EMPTY)
+					{
+						return false;
+					}
+					temporaryType = (destination - 1)->type;
+					(destination - 1)->type = piece->type;
+					temporaryColor = (destination - 1)->color;
+					(destination - 1)->color = piece->color;
+					if(checkCheck(destination - 1) > 0)
+					{
+					    (destination - 1)->type = temporaryType;
+						(destination - 1)->color = temporaryColor;
+						return false;
+					}
+					(destination - 1)->type = temporaryType;
+					(destination - 1)->color = temporaryColor;
+					if((destination + 1)->type == ROOK && !(destination + 1)->hasMoved)
+					{
+						shortCastling(destination);
+						return true;
+					}
+				}
+				else
+				{
+					if((destination - 1)->color != EMPTY || destination->color != EMPTY || (destination + 1)->color != EMPTY)
+					{
+						return false;
+					}
+					temporaryType = (destination + 1)->type;
+					(destination + 1)->type = piece->type;
+					temporaryColor = (destination + 1)->color;
+					(destination + 1)->color = piece->color;
+					if(checkCheck(destination + 1) > 0)
+					{
+					    (destination + 1)->type = temporaryType;
+						(destination + 1)->color = temporaryColor;
+						return false;
+					}
+					(destination + 1)->type = temporaryType;
+					(destination + 1)->color = temporaryColor;
+					if((destination - 2)->type == ROOK && !(destination - 2)->hasMoved)
+					{
+						longCastling(destination);
+						return true;
+					}
+				}
+			}
+		}
 		return false;
 	}
 
+    temporaryType = destination->type;
+	destination->type = piece->type;
 	temporaryColor = destination->color;
 	destination->color = piece->color;
 
 	if(checkCheck(destination) > 0)
 	{
+		destination->type = temporaryType;
 		destination->color = temporaryColor;
 		return false;
 	}
 	else
 	{
+		destination->type = temporaryType;
 		destination->color = temporaryColor;
 		return true;
 	}
@@ -1794,7 +1880,7 @@ bool checkPossibleCheck(struct pieces* piece, struct pieces* destination, struct
 
 void undoMove(struct pieces* piece, struct pieces* destination, struct pieces* temporaryPiece, struct pieces* temporaryDestination)
 {
-    bringBackPiece(temporaryPiece, piece);
+	bringBackPiece(temporaryPiece, piece);
 	bringBackPiece(temporaryDestination, destination);
 }
 
@@ -1888,4 +1974,38 @@ void promotion(struct pieces* piece)
 		promotionCounterWhite++;
 	}
 	return;
+}
+
+void shortCastling(struct pieces* destination)
+{
+	strcpy((destination - 1)->representation, (destination + 1)->representation);
+	(destination - 1)->type = (destination + 1)->type;
+	(destination - 1)->color = (destination + 1)->color;
+	(destination - 1)->canMove = (destination + 1)->canMove;
+	(destination - 1)->hasMoved = true;
+	(destination - 1)->justMoved = true;
+
+	strcpy((destination + 1)->representation, "   ");
+	(destination + 1)->type = EMPTY;
+	(destination + 1)->color = EMPTY;
+	(destination + 1)->canMove = false;
+	(destination + 1)->hasMoved = false;
+	(destination + 1)->justMoved = false;
+}
+
+void longCastling(struct pieces* destination)
+{
+	strcpy((destination + 1)->representation, (destination - 2)->representation);
+	(destination + 1)->type = (destination - 2)->type;
+	(destination + 1)->color = (destination - 2)->color;
+	(destination + 1)->canMove = (destination - 2)->canMove;
+	(destination + 1)->hasMoved = true;
+	(destination + 1)->justMoved = true;
+
+	strcpy((destination - 2)->representation, "   ");
+	(destination - 2)->type = EMPTY;
+	(destination - 2)->color = EMPTY;
+	(destination - 2)->canMove = false;
+	(destination - 2)->hasMoved = false;
+	(destination - 2)->justMoved = false;
 }
